@@ -42,7 +42,10 @@ class TestPluginInventory(unittest.TestCase):
         for manifest_path in manifests:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             self.assertEqual(manifest_path.parents[1].name, manifest["name"])
-            self.assertRegex(manifest["version"], r"^\d+\.\d+\.\d+$")
+            self.assertRegex(
+                manifest["version"],
+                r"^\d+\.\d+\.\d+$",
+            )
             package_path = manifest_path.parents[1] / "package.json"
             if package_path.is_file():
                 package = json.loads(package_path.read_text(encoding="utf-8"))
@@ -272,6 +275,7 @@ class TestPortableHelpers(unittest.TestCase):
 
 
 class TestScriptSyntax(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("sh"), "POSIX shell is not available")
     def test_all_posix_shell_scripts_parse(self):
         for script in sorted(PLUGINS_ROOT.glob("**/*.sh")):
             completed = subprocess.run(

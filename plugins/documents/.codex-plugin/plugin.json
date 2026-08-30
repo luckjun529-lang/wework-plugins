@@ -1,6 +1,6 @@
 {
   "name": "documents",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "使用本地开源工具创建、检查、编辑、渲染与校验 DOCX 文档。",
   "author": {
     "name": "Wecode AI",

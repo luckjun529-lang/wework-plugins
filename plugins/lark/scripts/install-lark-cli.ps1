@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'invoke-native-command.ps1')
 
@@ -37,8 +38,8 @@ if ($null -ne $pathCommand -and (Test-LarkCli $pathCommand.Source)) {
     exit 0
 }
 
-$primaryUrl = 'https://p11-market.byteimg.com/tos-cn-i-17oceyzymr/binaries/lark-cli/1.0.68/windows-amd64.zip'
-$fallbackUrl = 'https://p16-market-sg.ibyteimg.com/tos-alisg-i-qmhakdvxf5-sg/binaries/lark-cli/1.0.69/windows-x64-1784086368245859794.zip'
+$releaseUrl = 'https://github.com/larksuite/cli/releases/download/v1.0.68/lark-cli-1.0.68-windows-amd64.zip'
+$mirrorUrl = 'https://p11-market.byteimg.com/tos-cn-i-17oceyzymr/binaries/lark-cli/1.0.68/windows-amd64.zip'
 $expectedHash = 'd593f658151a0de1ab26b89ee8ff1d93a216777b8120db0b048013468ff63a1d'
 # Older Windows PowerShell 5.1 hosts may otherwise negotiate TLS 1.0.
 [Net.ServicePointManager]::SecurityProtocol = `
@@ -50,10 +51,11 @@ New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null
 try {
     $archivePath = Join-Path $temporaryDirectory 'lark-cli.zip'
     $downloaded = $false
-    foreach ($uri in @($primaryUrl, $fallbackUrl)) {
+    foreach ($uri in @($releaseUrl, $mirrorUrl)) {
         for ($attempt = 1; $attempt -le 3; $attempt++) {
             try {
-                Invoke-WebRequest -Uri $uri -OutFile $archivePath -UseBasicParsing
+                Invoke-WebRequest -Uri $uri -OutFile $archivePath `
+                    -UseBasicParsing -TimeoutSec 30
                 $downloaded = $true
                 break
             } catch {
@@ -67,7 +69,7 @@ try {
         }
     }
     if (-not $downloaded) {
-        throw 'Both official Lark CLI download mirrors failed.'
+        throw 'All official Lark CLI download sources failed.'
     }
 
     $actualHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()

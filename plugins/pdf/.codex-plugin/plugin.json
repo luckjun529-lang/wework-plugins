@@ -1,6 +1,6 @@
 {
   "name": "pdf",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "使用本地开源工具创建、检查、提取、转换、渲染与校验 PDF 文件。",
   "author": {
     "name": "Wecode AI",
