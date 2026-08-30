@@ -4,6 +4,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'invoke-native-command.ps1')
 
 $wecomVersion = '0.1.9'
 
@@ -15,8 +16,12 @@ function Test-WeComCli {
     if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) {
         return $false
     }
-    & $Executable --version *> $null
-    return $LASTEXITCODE -eq 0
+    $exitCode = -1
+    Invoke-NativeCommand `
+        -Command { & $Executable --version } `
+        -ExitCode ([ref]$exitCode) `
+        -DiscardOutput
+    return $exitCode -eq 0
 }
 
 function Resolve-WeComCli {
@@ -45,6 +50,9 @@ if ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant() -ne 'AMD64') {
 $primaryUrl = 'https://p11-market.byteimg.com/tos-cn-i-17oceyzymr/binaries/wecom-cli/0.1.9/win32-x64-1783946896354509143.zip'
 $fallbackUrl = 'https://p16-market-sg.ibyteimg.com/tos-alisg-i-qmhakdvxf5-sg/binaries/wecom-cli/0.1.9/win32-x64-1784086407740594051.zip'
 $expectedHash = '28e30dbff4d29634ccf3b1efbfbf98fa43ecc3f23bf147eee1458d8e5e2d9416'
+# Older Windows PowerShell 5.1 hosts may otherwise negotiate TLS 1.0.
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) `
     ("wegent-wecom-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null
@@ -97,4 +105,3 @@ try {
 } finally {
     Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction SilentlyContinue
 }
-

@@ -4,11 +4,12 @@
 
 ## 调用方式
 
-在线文档使用 XML full 内容，并让脚本读取 `docs +fetch --format json` 的 envelope：
+在线文档使用 XML full 内容。先运行 fetch，用工作区文件工具把 stdout 保存为
+cwd 下的 `./doc-fetch.json`，再让脚本读取该 envelope：
 
 ```bash
-lark-cli docs +fetch --doc "$URL" --doc-format xml --detail full --format json \
-  | python3 skills/lark-doc/scripts/doc_word_stat.py --protocol xml --lark-json --pretty
+lark-cli docs +fetch --doc <DOC_URL_OR_TOKEN> --doc-format xml --detail full --format json
+python3 skills/lark-doc/scripts/doc_word_stat.py ./doc-fetch.json --protocol xml --lark-json --pretty
 ```
 
 `$URL` 可以是用户给出的 docx/wiki URL，也可以是可被 `docs +fetch` 解析的 token。
@@ -23,8 +24,8 @@ lark-cli docs +fetch --doc "$URL" --doc-format xml --detail full --format json \
 如需在自动化或回归验证中发现未覆盖块类型，追加严格参数：
 
 ```bash
-lark-cli docs +fetch --doc "$URL" --doc-format xml --detail full --format json \
-  | python3 skills/lark-doc/scripts/doc_word_stat.py --protocol xml --lark-json --pretty --fail-on-unsupported --fail-on-unknown
+lark-cli docs +fetch --doc <DOC_URL_OR_TOKEN> --doc-format xml --detail full --format json
+python3 skills/lark-doc/scripts/doc_word_stat.py ./doc-fetch.json --protocol xml --lark-json --pretty --fail-on-unsupported --fail-on-unknown
 ```
 
 ## 如何读取结果

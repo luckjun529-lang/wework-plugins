@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $scriptDirectory 'invoke-native-command.ps1')
 $lark = & (Join-Path $scriptDirectory 'install-lark-cli.ps1') |
     Select-Object -Last 1
 foreach ($name in @(
@@ -18,5 +19,8 @@ foreach ($name in @(
 }
 $env:LARKSUITE_CLI_NO_UPDATE_NOTIFIER = '1'
 $env:LARKSUITE_CLI_NO_SKILLS_NOTIFIER = '1'
-& $lark @LarkArguments
-exit $LASTEXITCODE
+$larkExitCode = -1
+Invoke-NativeCommand `
+    -Command { & $lark @LarkArguments } `
+    -ExitCode ([ref]$larkExitCode)
+exit $larkExitCode

@@ -141,15 +141,12 @@ lark-cli im +chat-list --sort active_time --exclude-muted
 
 ### Scenario 3: Iterate all my chats programmatically
 
+Run the first page, parse `data.chats[].chat_id`, `data.has_more`, and
+`data.page_token` in memory, then repeat with the returned token until
+`has_more` is false:
+
 ```bash
-TOKEN=""
-while :; do
-  RESP=$(lark-cli im +chat-list --page-size 100 --page-token "$TOKEN" --format json)
-  echo "$RESP" | jq -r '.data.chats[].chat_id'
-  HAS_MORE=$(echo "$RESP" | jq -r '.data.has_more')
-  [ "$HAS_MORE" = "true" ] || break
-  TOKEN=$(echo "$RESP" | jq -r '.data.page_token')
-done
+lark-cli im +chat-list --page-size 100 --page-token <PAGE_TOKEN> --format json
 ```
 
 ## Common Errors and Troubleshooting

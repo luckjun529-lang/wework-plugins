@@ -936,11 +936,11 @@ Flags:
 
 #### 资源链接形态分流 — 按 content 里的链接 host 选下载方式
 
-`message list` / `message list-all` 拉到的消息，`content` 里的资源**不一定都是 mediaId**，下载方式由链接的 host 决定、不由文件扩展名决定；**首选对应 dws 命令**，裸 curl 仅对明确的公开直链有效。按下表分流、不要混用：
+`message list` / `message list-all` 拉到的消息，`content` 里的资源**不一定都是 mediaId**，下载方式由链接的 host 决定、不由文件扩展名决定；统一使用对应 dws 命令，避免依赖不同系统里的外部下载工具。按下表分流、不要混用：
 
 | `content` 里的形态 | 资源性质 | 下载方式 |
 |---|---|---|
-| `mediaId=...`（图片 / 视频 / 语音，扩展名任意） | 钉钉消息媒体；**host 不唯一**：`down.dingtalk.com/media`（公开直链）或 `*.trans.dingtalk.com/...?Expires=&Signature=`（签名 + 会过期） | **首选 `dws chat message download-media`**（内部取最新下载 URL，不受过期影响，需 `--message-id` + `--open-conversation-id`）。仅当链接是 `down.dingtalk.com/media` 公开直链时，可 `curl -sL -o` 快捷下载；**签名/过期链（`trans.dingtalk.com`、带 `Signature`/`Expires`）不要裸 curl，过期会 403** |
+| `mediaId=...`（图片 / 视频 / 语音，扩展名任意） | 钉钉消息媒体；**host 不唯一**：`down.dingtalk.com/media`（公开直链）或 `*.trans.dingtalk.com/...?Expires=&Signature=`（签名 + 会过期） | 使用 `dws chat message download-media`（内部取最新下载 URL，不受过期影响，需 `--message-id` + `--open-conversation-id`）；签名/过期链不要用外部下载命令，过期会 403 |
 | `[文件] xxx fileId: <fileId>`（钉盘文件） | 钉盘临时签名链接 | `dws drive download --node <fileId> --output <路径>`（裸 curl 不通用，需签名头） |
 | `https://alidocs.dingtalk.com/i/nodes/<nodeId>`（钉钉文档 / .adoc / 视频 .mov 等节点） | 文档 / 钉盘节点 | 读内容用 `dws doc`，下文件用 `dws drive download`（裸 curl 只得 HTML 预览页） |
 

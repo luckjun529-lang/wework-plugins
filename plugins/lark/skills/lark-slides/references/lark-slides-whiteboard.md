@@ -243,8 +243,8 @@ print(f"whiteboard width={wb_w} height={wb_h}")
   <mermaid>
     <![CDATA[
         flowchart TD
-            A[检查 lark-cli 与 jq] --> B[编写每页 slide XML]
-            B --> C[通过 jq 生成 slides JSON]
+            A[检查 lark-cli] --> B[编写每页 slide XML]
+            B --> C[序列化 slides JSON]
             C --> D[执行 slides +create]
             D --> E[读取 xml_presentation_id]
             E --> F[回读并验证创建结果]

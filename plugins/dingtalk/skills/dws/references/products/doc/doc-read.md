@@ -59,9 +59,9 @@ dws doc read --node <DOC_ID> --format json
 dws doc read --node "https://alidocs.dingtalk.com/i/nodes/<DOC_UUID>" --format json
 
 # JSONML 完整结构 → 文件（无损改写前置）
-dws doc read --node <DOC_ID> --content-format jsonml --output /tmp/doc.json
-# 之后修改 /tmp/doc.json 中的 jsonml 数组，再用：
-#   dws doc update --node <DOC_ID> --content-file /tmp/doc.json --content-format jsonml --mode overwrite
+dws doc read --node <DOC_ID> --content-format jsonml --output <temp-dir>/doc.json
+# 之后修改 <temp-dir>/doc.json 中的 jsonml 数组，再用：
+#   dws doc update --node <DOC_ID> --content-file <temp-dir>/doc.json --content-format jsonml --mode overwrite
 # 担心被并发覆盖时，再加 --revision <从上面 read 拿到的 revision>
 ```
 
@@ -69,9 +69,9 @@ dws doc read --node <DOC_ID> --content-format jsonml --output /tmp/doc.json
 
 如果你担心在编辑期间别人也在改这个文档，可以把 read 返回的 `revision` 透传给 update 触发服务端并发检查：
 
-1. `dws doc read --node <DOC_ID> --content-format jsonml --output /tmp/doc.json` — 输出 JSON 中的 `revision` 字段（如 `42`）记下来。
-2. 编辑 `/tmp/doc.json` 中的 `jsonml` 字段。
-3. `dws doc update --node <DOC_ID> --content-file /tmp/doc.json --content-format jsonml --mode overwrite --revision 42` — 文档若在期间被改过，服务端返回 `VersionConflict`，重做第 1 步即可。
+1. `dws doc read --node <DOC_ID> --content-format jsonml --output <temp-dir>/doc.json` — 输出 JSON 中的 `revision` 字段（如 `42`）记下来。
+2. 编辑 `<temp-dir>/doc.json` 中的 `jsonml` 字段。
+3. `dws doc update --node <DOC_ID> --content-file <temp-dir>/doc.json --content-format jsonml --mode overwrite --revision 42` — 文档若在期间被改过，服务端返回 `VersionConflict`，重做第 1 步即可。
 
 不带 `--revision` 时服务端不做并发检查，直接覆盖；普通单 agent 编辑场景下默认不传即可。
 

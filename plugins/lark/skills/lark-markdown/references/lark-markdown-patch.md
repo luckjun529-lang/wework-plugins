@@ -39,12 +39,11 @@ lark-cli markdown +patch \
   --pattern @./pattern.txt \
   --content @./replacement.md
 
-# 从 stdin 读取 replacement
-printf 'hi patched\n' | \
-  lark-cli markdown +patch \
-    --file-token boxcnxxxx \
-    --pattern 'hello markdown' \
-    --content -
+# 跨平台传递 replacement：先用工作区文件工具保存，再从文件读取
+lark-cli markdown +patch \
+  --file-token boxcnxxxx \
+  --pattern 'hello markdown' \
+  --content @./replacement.md
 
 # 预览底层编排
 lark-cli markdown +patch \

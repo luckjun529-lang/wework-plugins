@@ -78,7 +78,7 @@ lark-cli mail +decline-receipt --message-id <message-id> --dry-run
 
 ```bash
 # 1. 拉信
-lark-cli mail +message --message-id msg-1 --format json | jq '.data.label_ids'
+lark-cli mail +message --message-id msg-1 --format json
 # → ["UNREAD", "READ_RECEIPT_REQUEST"]
 
 # 2. 向用户提示：

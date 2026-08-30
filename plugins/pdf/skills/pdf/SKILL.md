@@ -11,8 +11,17 @@ Use the deterministic PDF CLI for common creation and transformation tasks. Pres
 
 Prefer workspace dependency Python. Otherwise use Python 3:
 
+On macOS/Linux use `python3`; on Windows PowerShell use `py -3` (or the
+workspace dependency loader's absolute `python.exe` path). On Windows set the
+skill directory with `$env:SKILL_DIR = '<skill-directory>'`. Every `python3`
+example below uses this platform-specific launcher substitution.
+
 ```bash
 python3 "$SKILL_DIR/scripts/bootstrap.py" <command> [arguments]
+```
+
+```powershell
+py -3 "$env:SKILL_DIR\scripts\bootstrap.py" <command> [arguments]
 ```
 
 Missing packages are installed from the hashed lock into `~/.wegent-executor/plugin-envs/wework-public/pdf/`, never globally.

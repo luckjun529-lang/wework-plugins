@@ -228,12 +228,11 @@ lark-cli vc +meeting-events \
 ### 场景 1：入会后读取会中发生了什么
 
 ```bash
-# 第 1 步：加入会议，记录返回的 meeting.id
-JOIN=$(lark-cli vc +meeting-join --as bot --meeting-number 123456789 --format json)
-MID=$(echo "$JOIN" | jq -r '.data.meeting.id')
+# 第 1 步：加入会议，直接解析返回 JSON 的 data.meeting.id
+lark-cli vc +meeting-join --as bot --meeting-number 123456789 --format json
 
 # 第 2 步：用 meeting.id 读取当前可见事件
-lark-cli vc +meeting-events --as bot --meeting-id "$MID" --page-all --format pretty
+lark-cli vc +meeting-events --as bot --meeting-id <MEETING_ID_FROM_PREVIOUS_JSON> --page-all --format pretty
 ```
 
 ### 场景 1b：应用机器人已在会中，先发现 meeting_id 再读事件

@@ -23,6 +23,8 @@ Wegent/WeWork 可发布的 Codex 插件。
   不修改数据的鉴权探针。只有明确的认证错误才会触发重新登录。
 - 后续业务请求通过 `scripts/run-dws.*` 调用 CLI。技能自带的复合 Python
   脚本通过 `scripts/run-python.*` 执行，以便自动注入本地 DWS 路径。
+- Windows PowerShell 5.1 下所有原生命令统一通过兼容边界执行：正常写入 stderr
+  的授权进度不会触发终止错误，最终结果始终以原生退出码判定。
 
 发布包没有内置任何用户凭据或平台专用二进制。下载地址和 SHA-256 来自
 官方 DWS CLI 1.0.58 GitHub Release。

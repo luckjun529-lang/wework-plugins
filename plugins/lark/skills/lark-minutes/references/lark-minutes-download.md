@@ -74,7 +74,7 @@ API 限流 5 次/秒，批量下载时需注意控制频率。
 {
   "minute_token": "obcnxxxxxxxxxxxxxxxxxxxx",
   "artifact_type": "recording",
-  "saved_path": "/path/to/minutes/obcnxxxxxxxxxxxxxxxxxxxx/访谈一则.m4a",
+  "saved_path": "<local-output-path>/obcnxxxxxxxxxxxxxxxxxxxx/访谈一则.m4a",
   "size_bytes": 52428800
 }
 ```

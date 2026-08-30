@@ -136,7 +136,7 @@ Usage:
   dws drive download [flags]
 Example:
   dws drive download --node <dentryUuid> --output ./report.pdf
-  dws drive download --node <dentryUuid> --output ~/downloads/
+  dws drive download --node <dentryUuid> --output <output-dir>
 Flags:
       --node string    文件 ID (dentryUuid) (必填)
       --output string     本地保存路径 (必填)，可以是文件路径或目录；如果指定目录，文件名从下载 URL 中自动推断
@@ -234,7 +234,7 @@ dws drive list --limit 20 --folder <dentryUuid> --format json
 dws drive info --node <dentryUuid> --format json
 
 # 4. 下载文件到本地
-dws drive download --node <dentryUuid> --output /tmp/ --format json
+dws drive download --node <dentryUuid> --output <temp-dir>/ --format json
 
 # 5. 创建文件夹
 dws drive mkdir --name "项目资料" --format json

@@ -53,6 +53,10 @@ If the file does not exist, continue normally unless the user asks to set up Pro
 
 ## Preflight
 
+The commands below use `python3` on macOS/Linux. On Windows PowerShell, replace
+that launcher with `py -3` (or use the absolute `python.exe` path supplied by
+the workspace dependency loader); keep the remaining arguments unchanged.
+
 When any Product Design workflow needs saved context, run:
 
 ```bash

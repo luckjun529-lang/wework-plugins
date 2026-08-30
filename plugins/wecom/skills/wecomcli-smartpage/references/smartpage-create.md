@@ -104,12 +104,12 @@ width-ratio：子容器宽度占比，范围 0.1~1.0，所有的子容器宽度�
         {
             "page_title": "需求文档",
             "content_type": 1,
-            "page_filepath": "/path/to/requirements.md"
+            "page_filepath": "<local-requirements-path>"
         },
         {
             "page_title": "设计说明",
             "content_type": 1,
-            "page_filepath": "/path/to/design.md"
+            "page_filepath": "<local-design-path>"
         }
     ]
 }

@@ -57,15 +57,15 @@ lark-cli slides +media-upload --file ./pic.png --presentation $PRES_ID --dry-run
 ### 给已有 PPT 加带图新页
 
 ```bash
-# 1) 上传图片
-TOKEN=$(lark-cli slides +media-upload --as user \
+# 1) 上传图片，直接解析返回 JSON 的 data.file_token
+lark-cli slides +media-upload --as user \
   --file ./pic.png \
-  --presentation $PRES_ID | jq -r .data.file_token)
+  --presentation <PRESENTATION_ID>
 
-# 2) 用 file_token 创建带图新页
+# 2) 使用工作区文件工具把 file_token 写入 ./slide-request.json，再创建带图新页
 lark-cli slides xml_presentation.slide create --as user \
-  --params "{\"xml_presentation_id\":\"$PRES_ID\"}" \
-  --data "{\"slide\":{\"content\":\"<slide xmlns=\\\"http://www.larkoffice.com/sml/2.0\\\"><data><img src=\\\"$TOKEN\\\" topLeftX=\\\"100\\\" topLeftY=\\\"100\\\" width=\\\"320\\\" height=\\\"180\\\"/></data></slide>\"}}"
+  --params '{"xml_presentation_id":"<PRESENTATION_ID>"}' \
+  --data @./slide-request.json
 ```
 
 ### 新建带图 PPT（推荐用 `+create --slides` 的 `@` 占位符，一步到位）
@@ -84,18 +84,14 @@ lark-cli slides +create --as user --title "图测试" --slides '[
 拿到 `file_token` 后走 [`+replace-slide`](lark-slides-replace-slide.md) 的 `block_insert`，不用搬原 XML、不改 `slide_id`、不打乱页序：
 
 ```bash
-PRES_ID=xxx
-SID=yyy       # 要加图的那一页
+# 1) 上传图片并直接解析返回 JSON 的 data.file_token
+lark-cli slides +media-upload --as user \
+  --file ./pic.png --presentation <PRESENTATION_ID>
 
-# 1) 上传图片拿 file_token
-TOKEN=$(lark-cli slides +media-upload --as user \
-  --file ./pic.png --presentation $PRES_ID | jq -r '.data.file_token')
-
-# 2) block_insert 到页末（或用 insert_before_block_id 指定插入位置）
+# 2) 使用工作区文件工具把 file_token 序列化到 ./parts.json，随后 block_insert
 lark-cli slides +replace-slide --as user \
-  --presentation "$PRES_ID" --slide-id "$SID" \
-  --parts "$(jq -n --arg token "$TOKEN" \
-    '[{action:"block_insert",insertion:("<img src=\""+$token+"\" topLeftX=\"500\" topLeftY=\"100\" width=\"200\" height=\"150\"/>")}]')"
+  --presentation <PRESENTATION_ID> --slide-id <SLIDE_ID> \
+  --parts @./parts.json
 ```
 
 注意事项：

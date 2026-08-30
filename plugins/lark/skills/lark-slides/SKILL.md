@@ -162,29 +162,26 @@ Step 4: 审查 & 交付
   - 没问题 → 交付：告知用户演示文稿 ID 和访问方式
 ```
 
-### jq 命令模板（编辑已有 PPT 时使用）
+### JSON 文件模板（编辑已有 PPT 时使用）
 
-新建 PPT 推荐用 `+create --slides`。以下 jq 模板适用于向已有演示文稿追加页面的场景，可以避免手动转义双引号：
+新建 PPT 推荐用 `+create --slides`。向已有演示文稿追加页面时，先使用工作区
+文件工具把请求体序列化为 cwd 下的 `./slide-request.json`，避免 shell 转义与
+平台差异，再用 `--data @./slide-request.json`：
 
 ```bash
-# 追加到末尾
+# 追加到末尾：slide-request.json = {"slide":{"content":"<slide ...>...</slide>"}}
 lark-cli slides xml_presentation.slide create \
   --as user \
   --params '{"xml_presentation_id":"YOUR_ID"}' \
-  --data "$(jq -n --arg content '<slide xmlns="http://www.larkoffice.com/sml/2.0">
-  <style><fill><fillColor color="BACKGROUND_COLOR"/></fill></style>
-  <data>
-    在这里放置 shape、line、table、chart、whiteboard 等元素
-  </data>
-</slide>' '{slide:{content:$content}}')"
+  --data @./slide-request.json
 
 # 插到指定页之前：before_slide_id 必须在 --data body 里，与 slide 同级
 # ⚠️ 不要把 before_slide_id 写进 --params —— CLI 会当未知 query 参数静默下发，服务端忽略，新页跑到末尾
+# slide-request.json = {"slide":{"content":"<slide ...>...</slide>"},"before_slide_id":"TARGET_SLIDE_ID"}
 lark-cli slides xml_presentation.slide create \
   --as user \
   --params '{"xml_presentation_id":"YOUR_ID"}' \
-  --data "$(jq -n --arg content '<slide ...>...</slide>' --arg before 'TARGET_SLIDE_ID' \
-    '{slide:{content:$content}, before_slide_id:$before}')"
+  --data @./slide-request.json
 ```
 
 > 渐变色必须使用 `rgba()` 格式并带百分比停靠点，如 `linear-gradient(135deg,rgba(15,23,42,1) 0%,rgba(56,97,140,1) 100%)`。使用 `rgb()` 或省略停靠点会导致服务端回退为白色。
@@ -270,6 +267,6 @@ lark-cli slides <resource> <method> [flags] # 调用 API
 5. **保存关键 ID**：后续操作需要 `xml_presentation_id`、`slide_id`、`revision_id`
 6. **删除谨慎**：删除操作不可逆，且至少保留一页幻灯片
 7. **编辑已有页面优先原链接更新**：修改单个 shape/img 用 `+replace-slide`（`block_replace` / `block_insert`），不要整页重建；已有 Slides 的多页整页重建用 `+replace-pages`，不要用 `slides +create` 新建整份 PPT；只有没有 shortcut 覆盖的特殊单页整页操作才手动 `slide.create` + `slide.delete`
-8. **`<img src>` 只能用上传到飞书 drive 的 `file_token`，禁止使用 http(s) 外链 URL**：飞书 slides 渲染端不会代理外链图片，外链 src 在 PPT 里通常不显示或显示破图。流程必须是「先把图存到本地 → 用 `slides +media-upload` 上传或 `+create --slides` 的 `@./path` 占位符自动上传 → 拿 `file_token` 写进 `<img src>`」。如果用户给了网图链接，先 `curl`/下载到 CWD 内再走上传流程，不要直接把外链 URL 塞进 `src`。**图片最大 20 MB**（slides upload API 不支持分片上传）。
+8. **`<img src>` 只能用上传到飞书 drive 的 `file_token`，禁止使用 http(s) 外链 URL**：飞书 slides 渲染端不会代理外链图片，外链 src 在 PPT 里通常不显示或显示破图。流程必须是「先把图存到本地 → 用 `slides +media-upload` 上传或 `+create --slides` 的 `@./path` 占位符自动上传 → 拿 `file_token` 写进 `<img src>`」。如果用户给了网图链接，先用工作区文件下载能力保存到 CWD，再走上传流程，不要直接把外链 URL 塞进 `src`。**图片最大 20 MB**（slides upload API 不支持分片上传）。
 
 > **注意**：如果 md 内容与 `slides_xml_schema_definition.xml` 或 `lark-cli schema slides.<resource>.<method>` 输出不一致，以后两者为准。

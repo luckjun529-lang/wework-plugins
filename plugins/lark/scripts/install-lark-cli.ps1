@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'invoke-native-command.ps1')
 
 $larkVersion = '1.0.68'
 
@@ -11,8 +12,11 @@ function Test-LarkCli {
     if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) {
         return $false
     }
-    $versionOutput = (& $Executable --version 2>$null | Out-String)
-    return $LASTEXITCODE -eq 0 -and $versionOutput.Contains($larkVersion)
+    $exitCode = -1
+    $versionOutput = Invoke-NativeCommand `
+        -Command { & $Executable --version 2>$null } `
+        -ExitCode ([ref]$exitCode) | Out-String
+    return $exitCode -eq 0 -and $versionOutput.Contains($larkVersion)
 }
 
 if ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant() -ne 'AMD64') {
@@ -36,6 +40,9 @@ if ($null -ne $pathCommand -and (Test-LarkCli $pathCommand.Source)) {
 $primaryUrl = 'https://p11-market.byteimg.com/tos-cn-i-17oceyzymr/binaries/lark-cli/1.0.68/windows-amd64.zip'
 $fallbackUrl = 'https://p16-market-sg.ibyteimg.com/tos-alisg-i-qmhakdvxf5-sg/binaries/lark-cli/1.0.69/windows-x64-1784086368245859794.zip'
 $expectedHash = 'd593f658151a0de1ab26b89ee8ff1d93a216777b8120db0b048013468ff63a1d'
+# Older Windows PowerShell 5.1 hosts may otherwise negotiate TLS 1.0.
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) `
     ("wegent-lark-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null

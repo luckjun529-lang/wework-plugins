@@ -23,7 +23,7 @@ Flags:
 
 ```bash
 # 步骤 1: 使用脚本一键上传（内部自动完成 prepare + PUT）
-python3 scripts/upload_attachment.py <BASE_ID> /path/to/report.pdf
+python scripts/upload_attachment.py <BASE_ID> <local-report-path>
 # 输出: { "fileToken": "ft_xxx", "fileName": "report.pdf", "size": 204800 }
 
 # 步骤 2: 在 record create/update 中使用 fileToken 写入
@@ -33,17 +33,4 @@ dws aitable record create --base-id <BASE_ID> --table-id <TABLE_ID> \
 
 > `uploadUrl` 有时效性（`expiresAt`），脚本会自动在获取后立即上传。
 
-## 手动流程（不使用脚本）
-
-```bash
-# 1. 获取上传凭证
-dws aitable attachment upload --base-id <BASE_ID> --file-name report.pdf --size 204800 --format json
-# → 返回 uploadUrl、fileToken
-
-# 2. PUT 上传（Content-Type 必须是文件的具体 MIME type）
-curl -X PUT "<uploadUrl>" -H "Content-Type: application/pdf" --data-binary @report.pdf
-
-# 3. 写入记录
-dws aitable record update --base-id <BASE_ID> --table-id <TABLE_ID> \
-  --records '[{"recordId":"recXXX","cells":{"fldAttachId":[{"fileToken":"ft_xxx"}]}}]' --format json
-```
+不要拆成裸 HTTP 命令手工上传：Windows PowerShell 会把 `curl` 解析成不同命令，且 Content-Type 容易破坏 OSS 签名。统一使用上面的跨平台脚本。

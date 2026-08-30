@@ -1,11 +1,12 @@
 # Slide XML 模板
 
-可直接复制使用的 slide XML 模板。纯文本/形状模板可使用 `jq` 包装后传给 `xml_presentation.slide.create`：
+可直接复制使用的 slide XML 模板。使用工作区文件工具把 XML 序列化为
+`./slide-request.json` 的 `slide.content` 字段，再传给 `xml_presentation.slide.create`：
 
 ```bash
 lark-cli slides xml_presentation.slide create --as user \
   --params '{"xml_presentation_id":"YOUR_ID"}' \
-  --data "$(jq -n --arg content 'PASTE_XML_HERE' '{slide:{content:$content}}')"
+  --data @./slide-request.json
 ```
 
 > **带图模板不要直接按上面的命令提交。** 新建 PPT 时可在 `+create --slides` 中使用 `src="@./local.png"`，CLI 会自动上传并替换为 `file_token`；给已有 PPT 添加或修改图片时，必须先用 `slides +media-upload` 拿到 `file_token`，再写进 `<img src="...">`。

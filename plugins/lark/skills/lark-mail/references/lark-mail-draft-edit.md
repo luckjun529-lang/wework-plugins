@@ -312,10 +312,8 @@ lark-cli mail +draft-edit --draft-id <draft_id> --inspect
 #   has_quoted_content: true  ← 说明有引用区，应使用 set_reply_body
 #   body_html_summary: "<div>原有回复内容</div>..."
 
-# 2. 使用 set_reply_body 编辑正文（value 只传用户撰写内容，不含引用区）
-cat > ./patch.json << 'EOF'
+# 2. 使用工作区文件工具把下面 JSON 保存为 ./patch.json（value 只传用户撰写内容，不含引用区）
 { "ops": [{ "op": "set_reply_body", "value": "<p>修改后的回复内容</p>" }] }
-EOF
 lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json
 ```
 
@@ -334,15 +332,13 @@ lark-cli mail +draft-edit --draft-id <draft_id> --inspect
 #   projection.large_attachments_summary (超大附件):
 #     [{"token":"12101...","filename":"video.mov","size_bytes":314572800}]
 
-# 2. 编写补丁文件。普通附件用 part_id（或 cid），超大附件用 token
-cat > ./patch.json << 'EOF'
+# 2. 使用工作区文件工具把下面 JSON 保存为 ./patch.json。普通附件用 part_id（或 cid），超大附件用 token
 {
   "ops": [
     { "op": "remove_attachment", "target": { "part_id": "1.3" } },
     { "op": "remove_attachment", "target": { "token": "12101..." } }
   ]
 }
-EOF
 
 # 3. 应用补丁
 lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json
@@ -356,14 +352,12 @@ lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json
 # 1. 查看草稿以获取当前 HTML 正文
 lark-cli mail +draft-edit --draft-id <draft_id> --inspect
 
-# 2. 编写补丁 — 直接使用相对路径（注意：回复草稿用 set_reply_body，普通草稿用 set_body）
-cat > ./patch.json << 'EOF'
+# 2. 使用工作区文件工具把下面 JSON 保存为 ./patch.json；直接使用相对路径（回复草稿用 set_reply_body，普通草稿用 set_body）
 {
   "ops": [
     { "op": "set_body", "value": "<div>内容<img src=\"./logo.png\" /><img src=\"./photo.jpg\" /></div>" }
   ]
 }
-EOF
 
 # 3. 应用补丁
 lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json
@@ -382,8 +376,7 @@ lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json
 # 1. 查看补丁模板
 lark-cli mail +draft-edit --print-patch-template
 
-# 2. 编写补丁文件（例如添加一个抄送并移除一个附件）
-cat > ./patch.json << 'EOF'
+# 2. 使用工作区文件工具把下面 JSON 保存为 ./patch.json（例如添加一个抄送并移除一个附件）
 {
   "ops": [
     { "op": "add_recipient", "field": "cc", "address": "carol@example.com", "name": "Carol" },
@@ -391,7 +384,6 @@ cat > ./patch.json << 'EOF'
   ],
   "options": {}
 }
-EOF
 
 # 3. 应用补丁
 lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json

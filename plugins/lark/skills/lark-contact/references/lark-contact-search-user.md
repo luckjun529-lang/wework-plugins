@@ -78,7 +78,7 @@ lark-cli contact +search-user --queries "a" --query "b"   # ❌ exit 2
 筛选信号(可信度从高到低):`chat_recency_hint`(近期联系过) > `enterprise_email` 前缀 > `department` 关键词。`localized_name` 同名时无区分作用。
 
 ```bash
-# 用 jq 按部门精筛
+# 用 CLI 内置的 --jq 按部门精筛
 lark-cli contact +search-user --query "张三" \
   --jq '.data.users[] | select(.department | contains("<部门关键词>"))'
 ```

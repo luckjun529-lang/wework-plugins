@@ -497,8 +497,8 @@ lark-cli sheets +csv-put --spreadsheet-token shtXXX --sheet-id "$SID" \
 只写入**已有**表（`--url` / `--spreadsheet-token` 二选一必填），不新建工作簿——**要新建表格直接用 `+workbook-create --sheets`**（同协议、一步建表 + 类型保真写入，详见 workbook reference）。读回用镜像命令 `+table-get`（见 read-data reference），输出与 `--sheets` 同构、可 round-trip。
 
 ```bash
-# sheet 按 name 匹配、缺则新建；多 DataFrame 经 stdin 一次写多 sheet
-python export.py | lark-cli sheets +table-put --url "<表URL>" --sheets -
+# sheet 按 name 匹配、缺则新建；让 Python 先把多 DataFrame payload 保存为 payload.json
+lark-cli sheets +table-put --url "<表URL>" --sheets @payload.json
 # 某 sheet 带 "mode":"append" 追加到已有数据末尾、默认不重复表头
 lark-cli sheets +table-put --spreadsheet-token "<token>" --sheets @payload.json
 ```

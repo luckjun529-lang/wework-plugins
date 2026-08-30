@@ -19,7 +19,7 @@ Example:
   dws doc update --node <DOC_ID> --content-file ./part1.md --mode append
   dws doc update --node <DOC_ID> --content "# 插入到第3个block前" --mode append --index 2
   dws doc update --node <DOC_ID> --content-file ./body.json --content-format jsonml --mode overwrite
-  cat part2.md | dws doc update --node <DOC_ID> --content - --mode append
+  dws doc update --node <DOC_ID> --content-file ./part2.md --mode append
 Flags:
       --node string           文档 ID 或 URL (必填)
       --content string        文档内容（短文本字面量）；传 - 表示从 stdin 读取
@@ -67,9 +67,9 @@ Flags:
 
 如果你担心在编辑期间别人也在改这个文档，可以传 `--revision` 触发服务端并发检查：
 
-1. `dws doc read --node <DOC_ID> --content-format jsonml --output /tmp/doc.json` — 返回的 JSON 里有一个 `revision` 字段（比如 `42`）。
-2. 编辑 `/tmp/doc.json` 里的 `jsonml` 字段。
-3. `dws doc update --node <DOC_ID> --content-file /tmp/doc.json --content-format jsonml --mode overwrite --revision 42` — 如果文档在期间被改过，服务端返回 `VersionConflict`，此时重新执行第 1 步即可。
+1. `dws doc read --node <DOC_ID> --content-format jsonml --output <temp-dir>/doc.json` — 返回的 JSON 里有一个 `revision` 字段（比如 `42`）。
+2. 编辑 `<temp-dir>/doc.json` 里的 `jsonml` 字段。
+3. `dws doc update --node <DOC_ID> --content-file <temp-dir>/doc.json --content-format jsonml --mode overwrite --revision 42` — 如果文档在期间被改过，服务端返回 `VersionConflict`，此时重新执行第 1 步即可。
 
 不带 `--revision` 时，服务端不做并发检查，直接覆盖。普通单 agent 编辑场景下默认不传即可。
 
@@ -157,7 +157,7 @@ CLI **不会**自动执行回读验证。**你必须在文档写入完成后主�
 
 ```bash
 # 1. 把内容写入 UTF-8 文本文件：
-#    Linux/Mac: /tmp/<name>.md；Windows: %TEMP%\<name>.md
+#    Linux/Mac: <temp-dir>/<name>.md；Windows: %TEMP%\<name>.md
 # 2. 一步写入：
 dws doc update --node <DOC_ID> --content-file <tmp> --mode overwrite --content-format markdown
 ```
@@ -172,20 +172,11 @@ dws doc update --node <nodeId> --content-file <part> --mode append --content-for
 
 > **注意**：分块 append 存在静默失败风险（部分片段返回 success 但实际未写入），执行前**必须**向用户发出截断风险提示并等待确认。完整规范见 [`../../best_practices/04-document.md` «分块 append 截断风险提示»](../../best_practices/04-document.md)。
 
-### stdin 变体
+### 跨平台文件变体
 
 ```bash
-# pipe
-cat report.md | dws doc update --node <DOC_ID> --content - --mode append --content-format markdown
-
-# heredoc（真实换行，含表格）
-dws doc update --node <DOC_ID> --mode append --content - --content-format markdown <<'EOF'
-## 追加段落
-
-| 列1 | 列2 |
-|---|---|
-| a | b |
-EOF
+# 先用工作区文件工具生成含真实换行和表格的 <temp-dir>/report.md
+dws doc update --node <DOC_ID> --content-file <temp-dir>/report.md --mode append --content-format markdown
 ```
 
 ## 上下文传递
@@ -199,31 +190,22 @@ EOF
 
 ```bash
 # overwrite 整段（用户已确认）
-dws doc update --node <DOC_ID> --content-file /tmp/<name>.md --mode overwrite --content-format markdown
+dws doc update --node <DOC_ID> --content-file <temp-dir>/<name>.md --mode overwrite --content-format markdown
 
 # append 末尾追加
-dws doc update --node <DOC_ID> --content-file /tmp/<name>-append.md --mode append --content-format markdown
+dws doc update --node <DOC_ID> --content-file <temp-dir>/<name>-append.md --mode append --content-format markdown
 
 # append 到指定 block 前（index 通过 doc block list 获取）
-dws doc update --node <DOC_ID> --content-file /tmp/<name>.md --mode append --index 2 --content-format markdown
+dws doc update --node <DOC_ID> --content-file <temp-dir>/<name>.md --mode append --index 2 --content-format markdown
 
 # JSONML 整篇无损 overwrite（默认不做并发检查；并发敏感时加 --revision <N>）
-dws doc update --node <DOC_ID> --content-file /tmp/<name>.json --content-format jsonml --mode overwrite
+dws doc update --node <DOC_ID> --content-file <temp-dir>/<name>.json --content-format jsonml --mode overwrite
 
 # 短文本字面量（<2KB 无换行）
 dws doc update --node <DOC_ID> --content "## 简短追加" --mode append --content-format markdown
 
-# stdin（pipe）
-cat report.md | dws doc update --node <DOC_ID> --content - --mode append --content-format markdown
-
-# stdin（heredoc，含表格）
-dws doc update --node <DOC_ID> --mode append --content - --content-format markdown <<'EOF'
-## 追加段落
-
-| 列1 | 列2 |
-|---|---|
-| a | b |
-EOF
+# 多行或含表格内容：先用工作区文件工具生成文件
+dws doc update --node <DOC_ID> --content-file <temp-dir>/report.md --mode append --content-format markdown
 ```
 
 ## 参考

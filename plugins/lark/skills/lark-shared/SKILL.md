@@ -13,6 +13,15 @@ description: "用于 lark-cli 的配置与授权任务：auth login/status/logou
 
 本技能指导你如何通过lark-cli操作飞书资源, 以及有哪些注意事项。
 
+## 跨平台命令硬规则
+
+- 参考文档中的反斜杠换行是 macOS/Linux 的展示写法；Windows PowerShell 执行时必须合并成单行，不能把 `\` 当续行符。
+- 禁止依赖 heredoc、`cat`、`grep`、`head`、`tail`、`sed`、`awk` 或 `jq`。使用工作区文件工具生成输入文件，使用 CLI 的 JSON 输出并在内存中解析。
+- `--file`、`--output`、`--output-dir`、`@file` 等路径仍遵守 CLI 的安全限制：只传当前工作目录下的相对路径。不要使用 `/tmp`、盘符绝对路径或 PowerShell 临时目录作为参数。
+- JSON、Markdown、XML 等多行输入先由工作区文件工具写入当前目录的相对文件，再传 `@./file` 或对应 `--*-file ./file` 参数；不要把 Bash 重定向或管道原样交给 Windows。
+- 路径和含空格参数必须保持为独立参数并完整引用，不得拼接成一段命令字符串后执行。
+- 参考文档中的 `python3` 在 macOS/Linux 原样使用；Windows PowerShell 必须替换为 `py -3`，或使用 workspace dependency loader 返回的绝对 `python.exe`。
+
 ## 配置初始化
 
 首次使用需运行 `lark-cli config init` 完成应用配置。
@@ -44,10 +53,12 @@ lark-cli config init --new
 | 取消用户对应用的全部服务端授权 | `auth logout` 只清本机登录态；服务端授权需用户在飞书授权管理页取消 |
 | 只取消一个 scope | CLI 不支持单独撤销一个已授予 scope；可重新走最小 scope 授权，或让用户在授权管理页处理 |
 
-机器读取 JSON 时，为减少 `_notice` 干扰，可在命令前加：
+机器读取 JSON 时需要关闭 `_notice` 干扰。插件包装器已经在所有平台设置
+`LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1` 和 `LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1`，
+直接执行逻辑命令即可：
 
 ```bash
-LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1 LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1 lark-cli auth status --json --verify
+lark-cli auth status --json --verify
 ```
 
 ### 身份类型
@@ -137,10 +148,11 @@ lark-cli 命令执行后，如果检测到新版本，JSON 输出中会包含 `_
 
 除非用户正在询问更新、版本或 notice，否则不要把 `_notice` 原样复制为当前任务的主要答案，也不要为了 notice 中断当前任务去反复查 help。
 
-需要稳定 JSON 给脚本或机器读取时，可以在命令前设置：
+需要稳定 JSON 给脚本或机器读取时，继续通过插件包装器执行；包装器会在
+macOS、Linux 和 Windows 上统一设置通知环境变量：
 
 ```bash
-LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1 LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1 <lark-cli command>
+<lark-cli command>
 ```
 
 当你在输出中看到 `_notice.update` 时，先完成用户当前请求；如仍相关，再简短告知可运行：

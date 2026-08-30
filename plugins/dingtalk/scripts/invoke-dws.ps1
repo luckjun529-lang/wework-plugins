@@ -38,3 +38,38 @@ function Invoke-DwsCommand {
         Output = $output
     }
 }
+
+function Invoke-NativeCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$Command,
+
+        [Parameter(Mandatory = $true)]
+        [ref]$ExitCode,
+
+        [switch]$DiscardOutput
+    )
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ExitCode.Value = -1
+    try {
+        # Windows PowerShell 5.1 converts native stderr into non-terminating
+        # ErrorRecord objects. Keep those records from bypassing exit-code
+        # handling while preserving the command's output for normal wrappers.
+        $ErrorActionPreference = 'Continue'
+        if ($DiscardOutput) {
+            & $Command *> $null
+        } else {
+            & $Command
+        }
+        if ($null -ne $LASTEXITCODE) {
+            $ExitCode.Value = [int]$LASTEXITCODE
+        }
+    } catch {
+        if (-not $DiscardOutput) {
+            Write-Error -ErrorRecord $_ -ErrorAction Continue
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}

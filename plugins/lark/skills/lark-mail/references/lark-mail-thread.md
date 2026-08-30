@@ -68,13 +68,13 @@ lark-cli mail +thread --thread-id <thread-id> --dry-run
 ## 注意事项
 
 - **JSON 输出可直接使用**，可直接读取，无需额外编码转换。
-- JSON 输出中 `messages[].body_html` 里的 `<` / `>` 可能显示为 `\u003c` / `\u003e`（JSON 安全转义，内容不变，`jq -r` 可还原）。
+- JSON 输出中 `messages[].body_html` 里的 `<` / `>` 可能显示为 `\u003c` / `\u003e`（JSON 安全转义，解析 JSON 后会还原）。
 - `mail +thread` 不再在读取会话时获取附件/图片下载 URL。如后续步骤需要 URL，请针对特定的 `message_id` 和 `attachment_ids` 调用原生附件 URL API。
 - 与 `+message` 一样，普通附件和内嵌图片都出现在 `messages[].attachments[]` 中，使用同一个 `user_mailbox.message.attachments download_url` API。
 - 查看某条邮件的原始 HTML：
 
 ```bash
-lark-cli mail +thread --thread-id <thread_id> --format json | jq -r '.data.messages[0].body_html'
+lark-cli mail +thread --thread-id <thread_id> --format json
 ```
 
 ## 典型场景
@@ -82,8 +82,8 @@ lark-cli mail +thread --thread-id <thread_id> --format json | jq -r '.data.messa
 ### 查看会话时间线 → 生成摘要
 
 ```bash
-# 1. 从某封邮件获取 thread_id
-lark-cli mail +message --message-id <id> --html=false --format json | jq '.data.thread_id'
+# 1. 从某封邮件的返回 JSON 解析 data.thread_id
+lark-cli mail +message --message-id <id> --html=false --format json
 
 # 2. 读取完整会话（仅纯文本）
 lark-cli mail +thread --thread-id <thread_id> --html=false --format json
@@ -94,9 +94,8 @@ lark-cli mail +thread --thread-id <thread_id> --html=false --format json
 ### 回复会话中最新一封邮件
 
 ```bash
-# 获取最新一封邮件的 message_id
-lark-cli mail +thread --thread-id <thread_id> --html=false --format json | \
-  jq '.data.messages[-1].message_id'
+# 获取完整会话并解析 data.messages[-1].message_id
+lark-cli mail +thread --thread-id <thread_id> --html=false --format json
 
 # 回复
 lark-cli mail +reply --message-id <last_message_id> --body "..."

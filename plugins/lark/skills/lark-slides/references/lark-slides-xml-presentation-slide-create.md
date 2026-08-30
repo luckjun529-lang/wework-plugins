@@ -111,28 +111,11 @@ lark-cli slides xml_presentation.slide create --as user --params '{
 ### 从文件读取 XML
 
 ```bash
-# 先创建 slide.xml 文件
-cat > slide.xml << 'EOF'
-<slide xmlns="http://www.larkoffice.com/sml/2.0">
-  <data>
-    <shape type="text" topLeftX="80" topLeftY="80" width="800" height="120">
-      <content textType="title">
-        <p>从文件加载</p>
-      </content>
-    </shape>
-    <shape type="text" topLeftX="80" topLeftY="200" width="800" height="180">
-      <content textType="body">
-        <p>这是从文件读取的幻灯片内容</p>
-      </content>
-    </shape>
-  </data>
-</slide>
-EOF
-
-# 然后创建幻灯片
+# 使用工作区文件工具把 XML 作为 slide.content 字符串序列化到 ./slide-request.json
+# 文件结构为：{"slide":{"content":"<slide ...>...</slide>"}}
 lark-cli slides xml_presentation.slide create --as user \
   --params '{"xml_presentation_id":"slides_example_presentation_id"}' \
-  --data "$(jq -n --arg content "$(cat slide.xml)" '{slide:{content:$content}}')"
+  --data @./slide-request.json
 ```
 
 ## 返回值
@@ -192,23 +175,13 @@ lark-cli slides xml_presentation.slide create --as user \
 
 ## 批量添加建议
 
-如果需要添加多张幻灯片，建议先明确每一页的 `before_slide_id`，或直接按最终顺序逐页追加：
+如果需要添加多张幻灯片，建议先明确每一页的 `before_slide_id`，使用工作区
+文件工具分别生成 `./slide-1.json`、`./slide-2.json` 等请求体，再按最终顺序逐页调用：
 
 ```bash
-#!/bin/bash
-
-PRESENTATION_ID="slides_example_presentation_id"
-
-declare -a slides=(
-  '<slide xmlns="http://www.larkoffice.com/sml/2.0"><data><shape type="text" topLeftX="80" topLeftY="80" width="800" height="120"><content textType="title"><p>页面 1</p></content></shape></data></slide>'
-  '<slide xmlns="http://www.larkoffice.com/sml/2.0"><data><shape type="text" topLeftX="80" topLeftY="80" width="800" height="120"><content textType="title"><p>页面 2</p></content></shape></data></slide>'
-  '<slide xmlns="http://www.larkoffice.com/sml/2.0"><data><shape type="text" topLeftX="80" topLeftY="80" width="800" height="120"><content textType="title"><p>页面 3</p></content></shape></data></slide>'
-)
-
-for slide_xml in "${slides[@]}"; do
-  payload=$(jq -n --arg content "$slide_xml" '{slide:{content:$content}}')
-  lark-cli slides xml_presentation.slide create --as user --params "{\"xml_presentation_id\":\"$PRESENTATION_ID\"}" --data "$payload"
-done
+lark-cli slides xml_presentation.slide create --as user \
+  --params '{"xml_presentation_id":"slides_example_presentation_id"}' \
+  --data @./slide-1.json
 ```
 
 ## 相关命令

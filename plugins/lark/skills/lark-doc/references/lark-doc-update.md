@@ -75,31 +75,18 @@ lark-cli docs +update --doc "<doc_id>" --command str_replace \
 lark-cli docs +update --doc "<doc_id>" --command str_replace \
   --doc-format markdown --pattern "旧内容" --content "新内容"
 
-# Markdown 模式下支持跨行匹配（--pattern 与 --content 都需要真实换行；"..."/'...' 里的 \n 是字面量）
-# 多行内容推荐 heredoc 或 --content @file.md，避免 shell 转义踩坑
+# Markdown 模式下用省略号匹配跨行范围；先用工作区文件工具把新内容保存为 ./replacement.md
 lark-cli docs +update --doc "<doc_id>" --command str_replace \
   --doc-format markdown \
-  --pattern "$(printf '## 旧标题\n\n第一段原文\n\n第二段原文')" \
-  --content - <<'EOF'
-## 新标题
-
-改写后的第一段
-
-改写后的第二段
-EOF
+  --pattern "## 旧标题...第二段原文" \
+  --content @./replacement.md
 
 # Markdown 模式下使用 `前缀...后缀` 省略号匹配首尾特征明显的大段内容
 # 下例会把「## 旧标题」到「结束语。」之间的所有内容整体替换
 lark-cli docs +update --doc "<doc_id>" --command str_replace \
   --doc-format markdown \
   --pattern "## 旧标题...结束语。" \
-  --content - <<'EOF'
-## 新标题
-
-重写后的正文...
-
-新的结束语。
-EOF
+  --content @./replacement.md
 
 # 删除文本：--content 传空字符串即可
 lark-cli docs +update --doc "<doc_id>" --command str_replace \

@@ -189,7 +189,7 @@ wecom-cli doc smartsheet_add_records '{"docid": "DOCID", "sheet_id": "SHEETID", 
 添加一行或多行记录，单次建议 500 行内。与 `smartsheet_add_records` 不同之处在于，可支持本地路径传入图片、文件。对于需要添加带图片或文件的记录，请使用此接口。传入后台后，后台将自动存储并转换为 `image_url`。
 
 ```bash
-wecom-cli doc +smartsheet_add_records_auto_file '{"docid":"DOCID","sheet_id":"SHEETID","records":[{"values":{"图片":[{"image_path":"/path/to/image.jpg"}],"文件":[{"file_path":"/path/to/file.txt"}]}}]}'
+wecom-cli doc +smartsheet_add_records_auto_file '{"docid":"DOCID","sheet_id":"SHEETID","records":[{"values":{"图片":[{"image_path":"<local-image-path>"}],"文件":[{"file_path":"<local-file-path>"}]}}]}'
 ```
 
 ### 更新记录（不带图片或文件）
@@ -210,7 +210,7 @@ wecom-cli doc smartsheet_update_records '{"docid": "DOCID", "sheet_id": "SHEETID
 更新一行或多行记录，单次建议在 500 行内。与 `smartsheet_update_records` 不同之处在于，可支持本地路径传入图片、文件。对于需要更新记录中的图片或文件，请使用此接口。传入后台后，后台将自动存储并转换为 `image_url`。
 
 ```bash
-wecom-cli doc +smartsheet_update_records_auto_file '{"docid": "DOCID", "sheet_id": "SHEETID", "key_type": "CELL_VALUE_KEY_TYPE_FIELD_TITLE", "records": [{"record_id": "RECORDID", "values": {"values":{"图片":[{"image_path":"/path/to/image.jpg"}],"文件":[{"file_path":"/path/to/file.txt"}]}}}]}'
+wecom-cli doc +smartsheet_update_records_auto_file '{"docid": "DOCID", "sheet_id": "SHEETID", "key_type": "CELL_VALUE_KEY_TYPE_FIELD_TITLE", "records": [{"record_id": "RECORDID", "values": {"values":{"图片":[{"image_path":"<local-image-path>"}],"文件":[{"file_path":"<local-file-path>"}]}}}]}'
 ```
 
 ### 删除记录

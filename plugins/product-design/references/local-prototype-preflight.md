@@ -7,14 +7,14 @@ Use this before creating a new local prototype.
 - Bundled Product Design starters live in `../templates/`.
 - Use the default `prototype` template for web or desktop-like prototypes.
 - Use `--template mobile-app` for mobile app prototypes.
-- Create the app with the bootstrap script. Resolve the script path relative to this file, then run it with an absolute path:
+- Create the app with the bootstrap script. Resolve both placeholders to absolute paths first; quote them so paths with spaces work on Windows and macOS:
 
-```bash
-node /absolute/path/to/plugins/product-design/scripts/bootstrap-prototype.mjs --dest /absolute/path/to/new-prototype
+```text
+node "<plugin-root>/scripts/bootstrap-prototype.mjs" --dest "<target-directory>"
 ```
 
-```bash
-node /absolute/path/to/plugins/product-design/scripts/bootstrap-prototype.mjs --template mobile-app --dest /absolute/path/to/new-mobile-prototype
+```text
+node "<plugin-root>/scripts/bootstrap-prototype.mjs" --template mobile-app --dest "<target-directory>"
 ```
 
 - For `mobile-app`, run `npm ci --prefer-offline --no-audit --no-fund` from the generated project root. For the web `prototype` template, run `npm install --prefer-offline --no-audit --no-fund`. Use the environment's configured npm cache.

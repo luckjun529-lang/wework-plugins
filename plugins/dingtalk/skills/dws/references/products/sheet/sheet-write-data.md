@@ -106,8 +106,8 @@ Example:
   dws sheet csv-put --node <NODE_ID> --sheet-id <SHEET_ID> --start-cell B2 \
     --csv @data.csv --allow-overwrite
 
-  cat data.csv | dws sheet csv-put --node <NODE_ID> --sheet-id <SHEET_ID> \
-    --start-cell A1 --csv -
+  dws sheet csv-put --node <NODE_ID> --sheet-id <SHEET_ID> \
+    --start-cell A1 --csv @data.csv
 
   dws sheet csv-put --node <NODE_ID> --sheet-id <SHEET_ID> --start-cell A1 \
     --csv @data.csv --dry-run

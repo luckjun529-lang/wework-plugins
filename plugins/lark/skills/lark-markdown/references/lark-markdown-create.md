@@ -21,11 +21,10 @@ lark-cli markdown +create \
   --name README.md \
   --content @./README.md
 
-# 从 stdin 读取内容
-printf '# Hello\n\nfrom stdin\n' | \
-  lark-cli markdown +create \
-    --name README.md \
-    --content -
+# 内容较长时先用工作区文件工具保存，再从文件读取
+lark-cli markdown +create \
+  --name README.md \
+  --content @./README.md
 
 # 创建到指定文件夹
 lark-cli markdown +create \

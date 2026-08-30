@@ -102,7 +102,7 @@ lark-cli mail user_mailbox.drafts send --params '{"user_mailbox_id":"me","draft_
 
 ### 创建带内嵌图片的 HTML 草稿
 
-> **推荐方式：** 直接在 `--body` HTML 中使用 `<img src="./logo.png" />`（相对路径），系统会自动创建内嵌 MIME 部分并替换为 `cid:` 引用。仅支持相对路径（如 `./logo.png`），不支持绝对路径（如 `/tmp/logo.png`）。
+> **推荐方式：** 直接在 `--body` HTML 中使用 `<img src="./logo.png" />`（相对路径），系统会自动创建内嵌 MIME 部分并替换为 `cid:` 引用。仅支持相对路径（如 `./logo.png`），不支持绝对路径（如 `<temp-dir>/logo.png`）。
 
 ```bash
 # 推荐：直接使用相对路径，自动解析为内嵌图片

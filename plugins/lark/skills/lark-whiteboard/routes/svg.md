@@ -32,7 +32,7 @@
 写文件   <dir>/diagram.svg
 渲染     npx -y @larksuite/whiteboard-cli@^0.2.12 -i <dir>/diagram.svg -o <dir>/diagram.png -f svg
 检查     npx -y @larksuite/whiteboard-cli@^0.2.12 -i <dir>/diagram.svg -f svg --check
-导出     npx -y @larksuite/whiteboard-cli@^0.2.12 -i <dir>/diagram.svg -f svg --to openapi --format json > <dir>/diagram.json
+导出     npx -y @larksuite/whiteboard-cli@^0.2.12 -i <dir>/diagram.svg -f svg --to openapi --format json -o <dir>/diagram.json
 ```
 
 `npx -y @larksuite/whiteboard-cli@^0.2.12 --check` 检测 `text-overflow` 和 `node-overlap`, 并结合视觉效果(查看 PNG)进行调整

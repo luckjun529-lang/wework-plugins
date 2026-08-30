@@ -169,8 +169,8 @@ Example:
   # 推荐：长内容走文件，避免 shell 引号问题
   dws report entry submit --template-id <templateId> --contents-file ./report.json --format json
 
-  # stdin 输入
-  cat report.json | dws report entry submit --template-id <templateId> --contents - --format json
+  # 跨平台文件输入
+  dws report entry submit --template-id <templateId> --contents-file ./report.json --format json
 
   # 内联（短内容）
   dws report entry submit --template-id <templateId> \

@@ -49,10 +49,10 @@ lark-cli event consume im.message.receive_v1 --max-events 1 --timeout 30s --as b
 # Run for 10 minutes then auto-exit
 lark-cli event consume im.message.receive_v1 --timeout 10m --as bot
 
-# Consume multiple EventKeys concurrently (one shape per process, no dispatcher)
-lark-cli event consume im.message.receive_v1          --as bot > receive.ndjson &
-lark-cli event consume im.message.reaction.created_v1 --as bot > reaction.ndjson &
-wait
+# Consume multiple EventKeys concurrently using the host executor's background-process support.
+# Start each logical command as its own process and capture each stdout stream separately.
+lark-cli event consume im.message.receive_v1 --as bot
+lark-cli event consume im.message.reaction.created_v1 --as bot
 
 ```
 

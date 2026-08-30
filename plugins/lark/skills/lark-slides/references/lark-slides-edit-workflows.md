@@ -18,16 +18,13 @@
 ## 最小读-改-写闭环
 
 ```bash
-PID="xml_presentation_id_here"
-SID="slide_id_here"
-
 # 1. 读原页，从 XML 里挑出要改的块的 3 位 short id（如 bUn / bab）
 lark-cli slides xml_presentation.slide get --as user \
-  --params "{\"xml_presentation_id\":\"$PID\",\"slide_id\":\"$SID\"}"
+  --params '{"xml_presentation_id":"<PRESENTATION_ID>","slide_id":"<SLIDE_ID>"}'
 
 # 2. 用 +replace-slide 直接改那个块（不需要搬原 XML）
 lark-cli slides +replace-slide --as user \
-  --presentation "$PID" --slide-id "$SID" \
+  --presentation <PRESENTATION_ID> --slide-id <SLIDE_ID> \
   --parts '[{"action":"block_replace","block_id":"bUn","replacement":"<shape type=\"text\" topLeftX=\"80\" topLeftY=\"80\" width=\"800\" height=\"120\"><content textType=\"title\"><p>新标题</p></content></shape>"}]'
 ```
 
@@ -38,14 +35,13 @@ lark-cli slides +replace-slide --as user \
 `--revision-id` 默认 `-1`，表示基于当前最新版执行。传具体版本号时，服务端以该版本为 base 应用变更：
 
 ```bash
-# 读时拿当前 revision_id
-REV=$(lark-cli slides xml_presentation.slide get --as user \
-  --params "{\"xml_presentation_id\":\"$PID\",\"slide_id\":\"$SID\"}" \
-  | jq '.data.revision_id')
+# 读时直接解析返回 JSON 的 data.revision_id
+lark-cli slides xml_presentation.slide get --as user \
+  --params '{"xml_presentation_id":"<PRESENTATION_ID>","slide_id":"<SLIDE_ID>"}'
 
 # 写时传该版本号，服务端以此为 base
 lark-cli slides +replace-slide --as user \
-  --presentation "$PID" --slide-id "$SID" --revision-id "$REV" \
+  --presentation <PRESENTATION_ID> --slide-id <SLIDE_ID> --revision-id <REVISION_ID> \
   --parts '[{"action":"block_replace","block_id":"bUn","replacement":"<shape type=\"rect\" topLeftX=\"100\" topLeftY=\"100\" width=\"200\" height=\"100\"/>"}]'
 ```
 
@@ -63,7 +59,7 @@ lark-cli slides +replace-slide --as user \
 
 ```bash
 lark-cli slides +replace-slide --as user \
-  --presentation "$PID" --slide-id "$SID" \
+  --presentation <PRESENTATION_ID> --slide-id <SLIDE_ID> \
   --parts '[{"action":"block_replace","block_id":"bab","replacement":"<shape type=\"text\" topLeftX=\"80\" topLeftY=\"80\" width=\"800\" height=\"120\"><content textType=\"title\"><p>新标题</p></content></shape>"}]'
 ```
 
@@ -80,10 +76,10 @@ lark-cli slides +replace-slide --as user \
 适合"只想加一个元素，不动现有元素"的场景（典型：给已有页加图）。
 
 ```bash
+# 使用工作区文件工具把 file_token 序列化到 ./parts.json
 lark-cli slides +replace-slide --as user \
-  --presentation "$PID" --slide-id "$SID" \
-  --parts "$(jq -n --arg token "$FILE_TOKEN" \
-    '[{action:"block_insert",insertion:("<img src=\""+$token+"\" topLeftX=\"500\" topLeftY=\"100\" width=\"200\" height=\"150\"/>"),insert_before_block_id:"baa"}]')"
+  --presentation <PRESENTATION_ID> --slide-id <SLIDE_ID> \
+  --parts @./parts.json
 ```
 
 字段说明：
@@ -94,7 +90,7 @@ lark-cli slides +replace-slide --as user \
 | `insertion` | 是 | 要插入的完整 XML 片段 |
 | `insert_before_block_id` | 否 | 插到这个块之前；省略（不提供此字段）则追加到页面末尾 |
 
-> **`<img>` 必须用 `file_token`**，不能用外链 URL——先 `slides +media-upload --file ./pic.png --presentation $PID` 拿 token。
+> **`<img>` 必须用 `file_token`**，不能用外链 URL——先 `slides +media-upload --file ./pic.png --presentation <PRESENTATION_ID>` 拿 token。
 
 ### 批量 parts
 
@@ -111,18 +107,15 @@ lark-cli slides +replace-slide --as user \
 
 整批作为原子事务：任一条失败整批不生效。失败时后端通常返回 3350001；若响应中带 `failed_part_index` / `failed_reason` 字段，shortcut 会原样透传。
 
-## 大 --parts 用 jq 或 stdin 组装
+## 大 --parts 使用文件组装
 
-`--parts` 支持 `@file`（读文件）和 `-`（stdin）作为值来源，适合批量 XML 场景：
+`--parts` 支持 `@file`（读文件），适合批量 XML 场景。先用工作区文件工具
+生成 cwd 内的相对 JSON 文件：
 
 ```bash
 # 从文件读
 lark-cli slides +replace-slide --as user --presentation "$PID" --slide-id "$SID" \
   --parts @parts.json
-
-# 从 stdin 读
-cat parts.json | lark-cli slides +replace-slide --as user --presentation "$PID" --slide-id "$SID" \
-  --parts -
 ```
 
 ## 错误排查

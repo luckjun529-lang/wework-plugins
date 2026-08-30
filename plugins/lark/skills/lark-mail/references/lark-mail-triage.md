@@ -31,8 +31,8 @@ lark-cli mail +triage --filter '{"folder":"flagged"}'
 lark-cli mail +triage --filter '{"label":"important"}'
 lark-cli mail +triage --filter '{"label":"重要邮件"}'
 
-# json/data 格式可配合 jq 处理
-lark-cli mail +triage --format json | jq '.messages[].subject'
+# JSON 格式：直接解析返回对象中的 messages[].subject
+lark-cli mail +triage --format json
 
 # 分页：先取 10 条，再用 page_token 翻页
 lark-cli mail +triage --max 10 --format json

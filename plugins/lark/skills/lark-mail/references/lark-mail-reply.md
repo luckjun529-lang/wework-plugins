@@ -226,10 +226,8 @@ lark-cli mail +message-modify --message-ids <原邮件ID> --remove-label-ids UNR
 `+reply` 创建的草稿正文包含引用区（原邮件的引用块）。如果需要编辑回复草稿的正文，**必须通过 `--patch-file` 使用 `set_reply_body` op**，它仅替换用户撰写部分，自动保留引用区。value 只传新的用户撰写内容，不要包含引用区。
 
 ```bash
-# 编辑回复草稿正文（自动保留引用区）
-cat > ./patch.json << 'EOF'
+# 使用工作区文件工具把下面 JSON 保存为 ./patch.json（自动保留引用区）
 { "ops": [{ "op": "set_reply_body", "value": "<p>修改后的回复内容</p>" }] }
-EOF
 lark-cli mail +draft-edit --draft-id <draft_id> --patch-file ./patch.json
 ```
 

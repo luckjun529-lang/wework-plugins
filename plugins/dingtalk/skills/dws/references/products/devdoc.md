@@ -98,9 +98,11 @@ dws devdoc error diagnose --error-code "40014" --query "access_token" --cursor "
 dws devdoc --help
 dws devdoc article search --query "OAuth2 接入" --dry-run --format json
 dws devdoc error diagnose --error-code "40014" --query "access_token" --dry-run --format json
-dws schema devdoc.search_open_platform_docs_rag --format json || true
-dws schema devdoc.search_open_error_code_rag --format json || true
+dws schema devdoc.search_open_platform_docs_rag --format json
+dws schema devdoc.search_open_error_code_rag --format json
 ```
+
+任一 schema 命令失败时直接读取并记录该命令的退出状态，不要用 shell 的 `|| true` 吞掉错误。
 
 - `--help` / `--dry-run` 只能证明 CLI 命令面和映射存在，不能证明后端工具已注册
 - 真实调用若返回 `PARAM_ERROR - 未找到指定工具`，不是用户参数问题；记录为网关/工具注册待闭环，并降级到 article search 或本地已挂载 Markdown
