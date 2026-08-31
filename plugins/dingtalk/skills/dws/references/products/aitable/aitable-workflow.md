@@ -145,14 +145,17 @@ dws aitable workflow disable --base-id BASE_ID --workflow-id WORKFLOW_ID --yes -
 ### 看看 Base 里有哪些自动化在跑
 
 ```bash
-dws aitable workflow list --base-id BASE_ID --format json | jq '.data | {total: .recordCount, running: .runningCount, items: .list | map({name, status, flowId})}'
+dws aitable workflow list --base-id BASE_ID --format json
 ```
+
+直接解析 `data.recordCount`、`data.runningCount` 与 `data.list[]` 的
+`name`、`status`、`flowId`。
 
 ### 临时停掉某个流程做调试
 
 ```bash
-# 1. 留底当前状态
-dws aitable workflow get --base-id BASE_ID --workflow-id WORKFLOW_ID --format json > /tmp/wf-backup.json
+# 1. 读取当前状态，并用工作区文件工具把返回 JSON 保存为 <temp-dir>/wf-backup.json
+dws aitable workflow get --base-id BASE_ID --workflow-id WORKFLOW_ID --format json
 
 # 2. 禁用
 dws aitable workflow disable --base-id BASE_ID --workflow-id WORKFLOW_ID --yes --format json
@@ -160,16 +163,17 @@ dws aitable workflow disable --base-id BASE_ID --workflow-id WORKFLOW_ID --yes -
 # 3. 调试做完后重启
 dws aitable workflow enable --base-id BASE_ID --workflow-id WORKFLOW_ID --format json
 
-# 4. 确认 status=RUNNING
-dws aitable workflow list --base-id BASE_ID --format json | jq '.data.list[] | select(.flowId == "WORKFLOW_ID") | .status'
+# 4. 确认目标 flowId 的 status=RUNNING
+dws aitable workflow list --base-id BASE_ID --format json
 ```
 
 ### 批量关掉某个 Base 下所有 workflow（调试 / 迁移前清场）
 
+先执行 `dws aitable workflow list --base-id BASE_ID --limit 100 --format json`，
+在内存中筛选 `status == "RUNNING"` 的 `flowId`，再逐个执行：
+
 ```bash
-for WF in $(dws aitable workflow list --base-id BASE_ID --limit 100 --format json | jq -r '.data.list[] | select(.status == "RUNNING") | .flowId'); do
-  dws aitable workflow disable --base-id BASE_ID --workflow-id "$WF" --yes --format json | jq .status
-done
+dws aitable workflow disable --base-id BASE_ID --workflow-id <FLOW_ID> --yes --format json
 ```
 
 ## 注意事项

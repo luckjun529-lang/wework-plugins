@@ -96,14 +96,14 @@ lark-cli slides +create --as user --title "图测试" --slides '[
 `+create --slides` 只在新建 PPT 时使用 `@` 占位符。给已有 PPT 加带图新页要分两步（CLI 没封装这个组合）：
 
 ```bash
-# 1) 上传图片
-TOKEN=$(lark-cli slides +media-upload --as user \
-  --file ./pic.png --presentation $PRES_ID | jq -r .data.file_token)
+# 1) 上传图片，直接解析返回 JSON 的 data.file_token
+lark-cli slides +media-upload --as user \
+  --file ./pic.png --presentation <PRESENTATION_ID>
 
-# 2) 用返回的 file_token 创建带图新页
+# 2) 使用工作区文件工具把 file_token 写入 ./slide-request.json，再创建带图新页
 lark-cli slides xml_presentation.slide create --as user \
-  --params "{\"xml_presentation_id\":\"$PRES_ID\"}" \
-  --data "{\"slide\":{\"content\":\"<slide xmlns=\\\"http://www.larkoffice.com/sml/2.0\\\"><data><img src=\\\"$TOKEN\\\" topLeftX=\\\"100\\\" topLeftY=\\\"100\\\" width=\\\"200\\\" height=\\\"200\\\"/></data></slide>\"}}"
+  --params '{"xml_presentation_id":"<PRESENTATION_ID>"}' \
+  --data @./slide-request.json
 ```
 
 ## 创建后续步骤
@@ -111,12 +111,12 @@ lark-cli slides xml_presentation.slide create --as user \
 如果没有使用 `--slides`，`slides +create` 返回的 `xml_presentation_id` 用于后续操作：
 
 ```bash
-# 第 1 步：创建空白 PPT
-PRES_ID=$(lark-cli slides +create --title "项目汇报" | jq -r '.data.xml_presentation_id')
+# 第 1 步：创建空白 PPT，直接解析返回 JSON 的 data.xml_presentation_id
+lark-cli slides +create --title "项目汇报" --format json
 
 # 第 2 步：添加页面（使用返回的 xml_presentation_id）
 lark-cli slides xml_presentation.slide create --as user \
-  --params "{\"xml_presentation_id\":\"$PRES_ID\"}" \
+  --params '{"xml_presentation_id":"<PRESENTATION_ID_FROM_PREVIOUS_JSON>"}' \
   --data '{
     "slide": {
       "content": "<slide xmlns=\"http://www.larkoffice.com/sml/2.0\">...</slide>"

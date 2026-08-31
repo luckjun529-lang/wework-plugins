@@ -22,36 +22,28 @@ dws aitable export data --base-id <BASE_ID> --task-id <TASK_ID> --timeout-ms 300
 | `table` | 必须 `--table-id` |
 | `view` | 必须 `--table-id` + `--view-id` |
 
-## 导入文件（三步流程）
+## 导入文件（跨平台脚本）
 
 当用户要求将 Excel（`.xlsx`）或 CSV 文件完整导入 AI 表格时，**不需要自己解析文件内容**，直接使用文件级导入。
 
 > **无需手动解析 CSV/Excel 再逐条 record create**，效率极低且容易出错。
 
-```bash
-# 第 1 步：申请上传凭证
-dws aitable import upload --base-id <BASE_ID> \
-  --file-name data.xlsx --file-size <字节数> --format json
-# → 返回 uploadUrl 和 importId
+```text
+# 新建表导入；脚本内部依次完成申请凭证、PUT 和触发导入
+python scripts/aitable_import_via_task.py <BASE_ID> <local-file-path>
 
-# 第 2 步：上传文件到 OSS（注意：Content-Type 必须设为空）
-curl -X PUT "<uploadUrl>" -H "Content-Type:" --data-binary @data.xlsx
-
-# 第 3 步：触发导入（新建表模式）
-dws aitable import data --import-id <importId> --format json
-# → 返回 status: success 和新建的 tableIds
-
-# 第 3 步（替代）：追加到已有表
-dws aitable import data --import-id <importId> --table-id <TABLE_ID> --format json
-# → 数据作为新行追加到指定表中
+# 追加到已有表
+python scripts/aitable_import_via_task.py <BASE_ID> <local-file-path> --table-id <TABLE_ID>
 ```
+
+Python 启动方式遵循主 Skill 的跨平台规则；Windows 优先通过 `run-python.ps1`，不要改用裸 `curl`。
 
 ### 步骤说明
 
 | 步骤 | 命令 | 说明 |
 |------|------|------|
 | 申请上传凭证 | `import upload --base-id <ID> --file-name <名称> --file-size <字节>` | `--file-size` 必须与实际文件大小一致 |
-| 上传文件 | HTTP PUT（curl 等） | **必须** 带 `-H "Content-Type:"` 将 Content-Type 设为空，否则 OSS 返回 403 |
+| 上传文件 | 脚本内置 HTTP PUT | **必须** 将 Content-Type 设为空，否则 OSS 返回 403 |
 | 触发导入 | `import data --import-id <ID> [--table-id <TABLE_ID>]` | 同步等待，大多一次调用即返回结果；超时可用相同 importId 重试 |
 
 ### import data 参数

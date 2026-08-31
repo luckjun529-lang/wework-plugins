@@ -187,9 +187,13 @@ def main() -> None:
     python = resolve_python()
     environment = os.environ.copy()
     environment["PYTHONNOUSERSITE"] = "1"
+    arguments = [str(python), str(TOOL_PATH), *sys.argv[1:]]
+    if os.name == "nt":
+        completed = subprocess.run(arguments, env=environment, check=False)
+        raise SystemExit(completed.returncode)
     os.execve(
         str(python),
-        [str(python), str(TOOL_PATH), *sys.argv[1:]],
+        arguments,
         environment,
     )
 

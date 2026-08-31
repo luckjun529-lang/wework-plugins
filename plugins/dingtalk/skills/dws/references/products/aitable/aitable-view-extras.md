@@ -164,22 +164,17 @@ dws aitable view duplicate --view-id VIEW_ID --format json
 ### 配置一个"金额超阈值红色高亮"的 Grid 视图
 
 ```bash
-BASE=baseXXX; TABLE=tblYYY; VIEW=viwGridZZ; FLD=fldAmount
-
 # 1) 关键字段冻结，避免横向滚动看不到
-dws aitable view update frozen-cols --base-id $BASE --table-id $TABLE --view-id $VIEW --count 1
+dws aitable view update frozen-cols --base-id <BASE_ID> --table-id <TABLE_ID> --view-id <VIEW_ID> --count 1
 
 # 2) 加大行高让数据更易读
-dws aitable view update row-height --base-id $BASE --table-id $TABLE --view-id $VIEW --cell-height 56
+dws aitable view update row-height --base-id <BASE_ID> --table-id <TABLE_ID> --view-id <VIEW_ID> --cell-height 56
 
 # 3) 金额 > 100 的单元格上色
-dws aitable view update fill-color-rule --base-id $BASE --table-id $TABLE --view-id $VIEW --json "[
-  {\"type\":\"cell\",\"formatFieldId\":\"$FLD\",\"format\":{\"color\":\"firstLine5\"},
-   \"filters\":[{\"fieldId\":\"$FLD\",\"symbol\":\"GT\",\"value\":100}]}
-]"
+dws aitable view update fill-color-rule --base-id <BASE_ID> --table-id <TABLE_ID> --view-id <VIEW_ID> --json '[{"type":"cell","formatFieldId":"<FIELD_ID>","format":{"color":"firstLine5"},"filters":[{"fieldId":"<FIELD_ID>","symbol":"GT","value":100}]}]'
 
 # 4) 锁定视图，防止他人改坏
-dws aitable view lock --base-id $BASE --table-id $TABLE --view-id $VIEW
+dws aitable view lock --base-id <BASE_ID> --table-id <TABLE_ID> --view-id <VIEW_ID>
 ```
 
 ### 复制一个"金牌客户"视图给销售团队

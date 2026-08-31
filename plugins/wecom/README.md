@@ -19,9 +19,14 @@
   优先使用系统钥匙串，并保留权限为 `0600` 的本地文件兜底。
 - 后续调用统一通过 `scripts/run-wecom-cli.*`，包装器会忽略进程环境中的
   Connector 凭据覆盖，只使用官方本机加密配置。
+- Windows PowerShell 5.1 下，安装、扫码授权和业务调用均通过原生命令兼容
+  边界，二维码进度写入 stderr 时仍以 CLI 原生退出码判断结果。
 
 插件包不内置用户凭据或平台专用二进制。下载地址和 SHA-256 来自
 `wecom@0.1.9` 的官方 binary manifest。
+
+Windows 可运行 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-native-command.ps1`
+验证非零退出码与正常 stderr 的处理。
 
 ## 能力
 

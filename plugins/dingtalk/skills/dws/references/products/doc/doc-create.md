@@ -27,7 +27,7 @@ Example:
   dws doc create --name "Q1 总结" --content "# Q1 总结" --folder <DOC_FOLDER_NODE_ID>
   dws doc create --name "知识库文档" --workspace <WS_ID>
   dws doc create --name "周报" --content-file ./weekly.md --folder <DOC_FOLDER_NODE_ID>
-  cat report.md | dws doc create --name "月报" --content -
+  dws doc create --name "月报" --content-file ./report.md
 Flags:
       --name string           文档名称 (必填)
       --folder string         目标文档文件夹 nodeId 或 alidocs 文件夹 URL；不要传 drive dentryId/parent-id 这类纯数字 ID
@@ -62,13 +62,13 @@ CLI **不会**自动回读校验。**每次创建后**都必须执行 `doc read 
 
 ```bash
 # 默认创建到「我的文档」根目录（推荐文件路径）
-dws doc create --name "<文档名>" --content-file /tmp/<name>.md --content-format markdown
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.md --content-format markdown
 
 # 创建到指定文件夹
-dws doc create --name "<文档名>" --content-file /tmp/<name>.md --folder <DOC_FOLDER_NODE_ID> --content-format markdown
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.md --folder <DOC_FOLDER_NODE_ID> --content-format markdown
 
 # 创建到知识库
-dws doc create --name "<文档名>" --content-file /tmp/<name>.md --workspace <WS_ID> --content-format markdown
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.md --workspace <WS_ID> --content-format markdown
 
 # 创建空文档（仅取 nodeId 后再分步写入，适合 >200KB 兜底）
 dws doc create --name "<文档名>" [--folder <ID> | --workspace <ID>] --content-format markdown
@@ -76,15 +76,15 @@ dws doc create --name "<文档名>" [--folder <ID> | --workspace <ID>] --content
 # 短纯文本字面量（< 2KB 且无换行/表格才允许）
 dws doc create --name "<文档名>" --content "短内容" --content-format markdown
 
-# stdin（heredoc / pipe）
-cat report.md | dws doc create --name "月报" --content - --content-format markdown
+# 多行文件输入
+dws doc create --name "月报" --content-file <temp-dir>/report.md --content-format markdown
 
 # JSONML 起稿（决策型 / 对展示效果有要求时直接用 JSONML 构造）
 # 详见 doc-create-workflow.md §JSONML 起稿判定
-dws doc create --name "<文档名>" --content-file /tmp/<name>.json --content-format jsonml
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.json --content-format jsonml
 
 # JSONML 创建到指定文件夹
-dws doc create --name "<文档名>" --content-file /tmp/<name>.json --content-format jsonml --folder <DOC_FOLDER_NODE_ID>
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.json --content-format jsonml --folder <DOC_FOLDER_NODE_ID>
 ```
 
 ## 参考

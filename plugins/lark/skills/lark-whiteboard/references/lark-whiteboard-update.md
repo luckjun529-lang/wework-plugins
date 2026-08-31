@@ -31,37 +31,20 @@
 
 ## 示例
 
-### 示例 1：使用 PlantUML 代码更新画板（从 stdin 读取）
+### 示例 1：使用 PlantUML 代码更新画板（从文件读取）
 
 ```bash
-# 编写 PlantUML 代码
-cat > diagram.puml << 'EOF'
-@startuml
-Alice -> Bob: Hello
-Bob -> Alice: Hi
-@enduml
-EOF
-
-# 通过管道传递给命令
-cat diagram.puml | lark-cli whiteboard +update \
+# 使用工作区文件工具将 PlantUML 内容保存为 ./diagram.puml，再从相对文件读取
+lark-cli whiteboard +update \
   --whiteboard-token <画板Token> \
-  --input_format plantuml --source -\
+  --input_format plantuml --source @./diagram.puml \
   --overwrite --as user
 ```
 
 ### 示例 2：使用 Mermaid 代码更新画板（从文件读取）
 
 ```bash
-# 编写 Mermaid 代码
-cat > diagram.mmd << 'EOF'
-graph TD
-    A[开始] --> B{判断}
-    B -->|是| C[处理]
-    B -->|否| D[结束]
-    C --> D
-EOF
-
-# 从文件读取并更新
+# 使用工作区文件工具将 Mermaid 内容保存为 ./diagram.mmd，再从相对文件读取
 lark-cli whiteboard +update \
   --whiteboard-token <画板Token> \
   --input_format mermaid \
@@ -74,13 +57,15 @@ lark-cli whiteboard +update \
 whiteboard-cli 工具的具体用法请参考 [§ 渲染 & 写入画板](../SKILL.md#渲染--写入画板)
 
 ```bash
-# 使用 whiteboard-cli 生成 OpenAPI 格式并通过管道传递
-npx -y @larksuite/whiteboard-cli@^0.2.12 -i <产物文件> --to openapi --format json \
-  | lark-cli whiteboard +update \
-    --whiteboard-token <画板Token> \
-    --source - --input_format raw \
-    --idempotent-token <10+字符唯一串> \
-    --as user
+# 使用 whiteboard-cli 生成 OpenAPI 格式文件
+npx -y @larksuite/whiteboard-cli@^0.2.12 -i <产物文件> --to openapi --format json -o ./temp.json
+
+# 再从相对文件读取，避免 shell 管道依赖
+lark-cli whiteboard +update \
+  --whiteboard-token <画板Token> \
+  --source @./temp.json --input_format raw \
+  --idempotent-token <10+字符唯一串> \
+  --as user
 ```
 
 ### 示例 4：先生成产物文件，再从文件读取更新
@@ -105,15 +90,7 @@ lark-cli whiteboard +update \
 适用于从零创建（直接写入 SVG）和编辑现有画板（编辑工作流详见 [`../routes/svg-edit.md`](../routes/svg-edit.md)）。
 
 ```bash
-# 编写或导出 SVG 文件
-cat > diagram.svg << 'EOF'
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
-  <rect x="10" y="10" width="80" height="40" fill="#4A90E2"/>
-  <text x="50" y="35" text-anchor="middle" fill="#fff">Hello</text>
-</svg>
-EOF
-
-# 从文件读取并更新
+# 使用工作区文件工具将 SVG 保存为 ./diagram.svg，再从相对文件读取
 lark-cli whiteboard +update \
   --whiteboard-token <画板Token> \
   --input_format svg \

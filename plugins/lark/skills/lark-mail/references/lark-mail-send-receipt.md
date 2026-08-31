@@ -78,7 +78,7 @@ lark-cli mail +send-receipt --message-id <message-id> --dry-run
 
 ```bash
 # 1. 拉信
-lark-cli mail +message --message-id msg-1 --format json | jq '.data.label_ids'
+lark-cli mail +message --message-id msg-1 --format json
 # 输出 ["UNREAD", "READ_RECEIPT_REQUEST"] → 原邮件请求了已读回执
 
 # 2. 向用户提示：
@@ -92,9 +92,8 @@ lark-cli mail +send-receipt --message-id msg-1 --yes
 ### 场景 2：批量拉信中发现多封请求回执
 
 ```bash
-# 1. 筛出带 -607 标签的邮件
-lark-cli mail +triage --folder INBOX --format json \
-  | jq '.data.messages[] | select(.label_ids | index("READ_RECEIPT_REQUEST")) | {message_id, subject, from}'
+# 1. 拉取邮件，在返回 JSON 中筛选 label_ids 包含 READ_RECEIPT_REQUEST 的记录
+lark-cli mail +triage --folder INBOX --format json
 
 # 2. 对每封分别问用户 → 用户确认后再发
 ```

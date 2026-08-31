@@ -297,12 +297,13 @@
 4. **调写信 shortcut 生成草稿** — 把替换后的 HTML 通过 `--body` 参数交给写信链路（推荐 `+draft-create` 先存草稿、用户复核后再 `+send`）：
 
    ```bash
+   # 使用工作区文件工具读取并替换模板，把最终 HTML 保存为 ./mail-body.html
    lark-cli mail +draft-create --as user \
      --to alice@example.com --subject 'Q3 团队周报' \
-     --body "$(cat skills/lark-mail/assets/templates/weekly--team-report.html)"
+     --body-file ./mail-body.html
    ```
 
-   实际使用时 `$(cat ...)` 可换成 AI 替换文本后写入的本地副本，或直接把替换后的 HTML 字符串作为 `--body` 的值。
+   实际使用时也可把替换后的短 HTML 字符串直接作为 `--body` 的值。
 
 5. **拿到草稿链接给用户复核** — 写信 shortcut 返回 `reference` 字段（草稿打开链接），把它给用户在飞书邮箱 UI 里打开核对，再决定下一步发送 / 编辑。
 

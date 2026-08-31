@@ -39,9 +39,8 @@ dws aitable record share-url \
 # 一次拿一条记录的链接
 dws aitable record share-url --base-id BASE --table-id TBL --record-ids rec1
 
-# 批量拿，配合 jq 过滤出 url
-dws aitable record share-url --base-id BASE --table-id TBL --record-ids rec1,rec2,rec3 --format json \
-  | jq '.data.items[] | {recordId, shareUrl}'
+# 批量拿，直接解析返回 JSON 的 recordId 与 shareUrl
+dws aitable record share-url --base-id BASE --table-id TBL --record-ids rec1,rec2,rec3 --format json
 
 # 带视图上下文（链接打开时落在指定视图）
 dws aitable record share-url --base-id BASE --table-id TBL --record-ids rec1 --view-id viw_VIP

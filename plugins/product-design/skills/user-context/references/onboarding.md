@@ -36,6 +36,9 @@ $CODEX_HOME/state/plugins/product-design/user-context.md
 
 Create the file first if needed:
 
+Use `python3` on macOS/Linux and `py -3` on Windows PowerShell, as defined by
+the parent User Context skill:
+
 ```bash
 python3 scripts/init_user_context.py
 ```

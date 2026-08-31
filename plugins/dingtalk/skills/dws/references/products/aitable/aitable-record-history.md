@@ -54,9 +54,10 @@ dws aitable record history-list \
 ### 1. 看一条记录被改过几次
 
 ```bash
-dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --format json \
-  | jq '.data.histories[] | {version, action, operateTime}'
+dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --format json
 ```
+
+直接解析返回 JSON 的 `data.histories[]`，读取 `version`、`action`、`operateTime`。
 
 ### 2. 翻页拉全量历史
 
@@ -73,16 +74,18 @@ dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --
 ### 3. 回溯某字段最近一次值
 
 ```bash
-dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --limit 50 --format json \
-  | jq '[.data.histories[] | select(.action == "update")][0].oldValue'
+dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --limit 50 --format json
 ```
+
+在返回 JSON 中选择第一条 `action == "update"` 的历史并读取 `oldValue`。
 
 ### 4. 找出删除事件（如果存在 delete history）
 
 ```bash
-dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --format json \
-  | jq '.data.histories[] | select(.action == "delete") | {version, operateTime}'
+dws aitable record history-list --base-id BASE --table-id TBL --record-id REC --format json
 ```
+
+在返回 JSON 中筛选 `action == "delete"`，读取 `version` 与 `operateTime`。
 
 ## 注意事项
 

@@ -121,21 +121,19 @@ lark-cli vc +meeting-message-send --as bot --meeting-id <meeting_id> --msg-type 
 ### 6. Agent 参会示范
 
 ```bash
-# 1. 入会，捕获 meeting.id
-AS=bot
-JOIN=$(lark-cli vc +meeting-join --as "$AS" --meeting-number 123456789 --format json)
-MID=$(echo "$JOIN" | jq -r '.data.meeting.id')
+# 1. 入会，直接解析返回 JSON 的 data.meeting.id
+lark-cli vc +meeting-join --as bot --meeting-number 123456789 --format json
 
 # 2. 会中轮询事件
-#    沿用入会身份；默认用 --page-all 拉全当前可见事件；下次增量优先复用 page_token
+#    把上一步解析出的 ID 作为 <MEETING_ID>；沿用入会身份；默认用 --page-all 拉全当前可见事件；下次增量优先复用 page_token
 #    典型间隔 10-30 秒
-lark-cli vc +meeting-events --as "$AS" --meeting-id "$MID" --page-all --format pretty
+lark-cli vc +meeting-events --as bot --meeting-id <MEETING_ID> --page-all --format pretty
 
 # 3. 会后可选：进入 lark-vc 获取会议产物信息，再按 note_id / minute_token 决策读取
-lark-cli vc +detail --meeting-ids "$MID"
+lark-cli vc +detail --meeting-ids <MEETING_ID>
 ```
 
-如果用户随后明确要求退出 / 离开 / 结束参会，再单独调用 `lark-cli vc +meeting-leave --as bot --meeting-id "$MID"`。
+如果用户随后明确要求退出 / 离开 / 结束参会，再单独调用 `lark-cli vc +meeting-leave --as bot --meeting-id <MEETING_ID>`。
 
 如果已经知道目标用户 `open_id`，且 bot 已在会中，也可以先发现当前会：
 

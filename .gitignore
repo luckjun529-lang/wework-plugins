@@ -7,4 +7,3 @@ __pycache__/
 .tmp/
 .idea/
 .vscode/
-tests/

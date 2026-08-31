@@ -94,20 +94,13 @@ lark-cli slides xml_presentation.slide replace --as user --params '{
 ### block_insert：在已有页上加一张图
 
 ```bash
-# 先拿 file_token
-TOKEN=$(lark-cli slides +media-upload --file ./pic.png --presentation "$PID" --as user | jq -r '.data.file_token')
+# 先上传图片，直接解析返回 JSON 的 data.file_token
+lark-cli slides +media-upload --file ./pic.png --presentation <PRESENTATION_ID> --as user
 
-lark-cli slides xml_presentation.slide replace --as user --params "{
-  \"xml_presentation_id\": \"$PID\",
-  \"slide_id\": \"$SID\"
-}" --data "$(jq -n --arg token "$TOKEN" '{
-  parts: [
-    {
-      action: "block_insert",
-      insertion: ("<img src=\"" + $token + "\" topLeftX=\"500\" topLeftY=\"100\" width=\"200\" height=\"150\"/>")
-    }
-  ]
-}')"
+# 使用工作区文件工具把 file_token 序列化到 ./replace-request.json
+lark-cli slides xml_presentation.slide replace --as user \
+  --params '{"xml_presentation_id":"<PRESENTATION_ID>","slide_id":"<SLIDE_ID>"}' \
+  --data @./replace-request.json
 ```
 
 ### 多条 parts 原子执行

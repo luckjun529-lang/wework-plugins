@@ -23,8 +23,8 @@
 # 查看当前状态（不修改）
 lark-cli mail +template-update --as user --template-id 712345 --inspect
 
-# 打印 patch 骨架并保存
-lark-cli mail +template-update --as user --print-patch-template > /tmp/tpl-patch.json
+# 打印 patch 骨架，并使用工作区文件工具把 stdout 保存为 ./tpl-patch.json
+lark-cli mail +template-update --as user --print-patch-template
 
 # 用扁平 flag 改 subject + cc
 lark-cli mail +template-update --as user --template-id 712345 \
@@ -33,7 +33,7 @@ lark-cli mail +template-update --as user --template-id 712345 \
 
 # 用 patch 文件做结构化更新（支持 is_plain_text_mode 翻回 false 等 tri-state 场景）
 lark-cli mail +template-update --as user --template-id 712345 \
-  --patch-file /tmp/tpl-patch.json
+  --patch-file ./tpl-patch.json
 
 # 追加新附件
 lark-cli mail +template-update --as user --template-id 712345 \

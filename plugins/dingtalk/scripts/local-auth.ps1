@@ -325,7 +325,9 @@ if ([string]::IsNullOrWhiteSpace($dws) -or -not (Test-Path -LiteralPath $dws -Pa
 
 switch ($Action) {
     'health' {
-        $authState = Get-AuthenticationState
+        # DWS may briefly block its first credential-store read after install.
+        # Retry once so a transient startup delay does not trigger redundant OAuth.
+        $authState = Wait-Authenticated -Attempts 2 -DelayMilliseconds 250
         if ($authState.Authenticated) {
             Write-Status 'ok' 'DingTalk authorization is ready.'
         } else {

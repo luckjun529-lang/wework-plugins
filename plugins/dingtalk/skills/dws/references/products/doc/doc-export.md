@@ -18,7 +18,7 @@ Usage:
   dws doc export [flags]
 Example:
   dws doc export --node "https://alidocs.dingtalk.com/i/nodes/xxx" --output ./exported.docx
-  dws doc export --node <DOC_ID> --output ~/downloads/
+  dws doc export --node <DOC_ID> --output <output-dir>
 Flags:
       --node string           要导出的文档标识，支持文档 URL 或 dentryUuid (必填)
       --output string         本地保存路径，文件路径或目录 (必填)
@@ -64,7 +64,7 @@ Flags:
 dws doc export --node <DOC_ID> --output ./exported.docx
 
 # 输出到目录（自动按文档名命名）
-dws doc export --node <DOC_ID> --output ~/downloads/
+dws doc export --node <DOC_ID> --output <output-dir>
 
 # alidocs URL 直传
 dws doc export --node "https://alidocs.dingtalk.com/i/nodes/<DOC_UUID>" --output ./exported.docx

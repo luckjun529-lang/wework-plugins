@@ -226,7 +226,7 @@
 | `file_token`（如 `boxcnXXXXXXXXXXXXXXXXXXXXXX`） | 通过 `slides +media-upload` 上传后返回的 token |
 | `@<本地路径>`（如 `@./assets/chart.png`） | **仅在 `slides +create --slides` 中可用**：CLI 会自动上传该文件并替换为 file_token |
 
-> **禁止使用 http(s) 外链 URL**：飞书 slides 渲染端不会代理外链图片，`src="https://..."` 在 PPT 里通常显示破图。要用网图必须先 `curl`/下载到 CWD 内，再走上传流程拿 `file_token`。
+> **禁止使用 http(s) 外链 URL**：飞书 slides 渲染端不会代理外链图片，`src="https://..."` 在 PPT 里通常显示破图。要用网图必须先用工作区文件下载能力保存到 CWD，再走上传流程拿 `file_token`。
 
 本地图片的两种姿势：
 

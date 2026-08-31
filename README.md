@@ -29,11 +29,23 @@ The document, PDF, presentation, and spreadsheet plugins prefer compatible Pytho
 
 LibreOffice and Poppler are optional host-provided native tools used for PDF conversion and page rendering. Creation, inspection, editing, and structural validation do not mutate those tools.
 
-Run the cross-plugin structural smoke test with:
+## Windows compatibility
+
+All eight plugins are covered by repository-level Windows compatibility tests.
+DingTalk, Lark, and WeCom ship PowerShell launchers that preserve native exit
+codes even when Windows PowerShell 5.1 converts normal CLI stderr into error
+records. Python-based skills document the Windows `py -3` launcher, and
+reference commands avoid hard-coded POSIX temporary paths and heredocs.
+
+Run the cross-plugin compatibility suite with:
 
 ```bash
-uv run python tests/smoke.py
+python -m unittest discover -s tests -v
 ```
+
+The `Windows compatibility` GitHub Actions workflow additionally parses every
+PowerShell script and runs the native Windows authorization/exit-code tests on
+`windows-latest`.
 
 ## Adding a plugin
 

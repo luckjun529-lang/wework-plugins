@@ -36,9 +36,9 @@ lark-cli slides +create --title "项目汇报"
 ## 示例 2: 创建后添加第一页
 
 ```bash
-PRESENTATION_ID=$(lark-cli slides +create --title "季度复盘" | jq -r '.data.xml_presentation_id')
+lark-cli slides +create --title "季度复盘" --format json
 
-lark-cli slides xml_presentation.slide create --as user --params "{\"xml_presentation_id\":\"$PRESENTATION_ID\"}" --data '{
+lark-cli slides xml_presentation.slide create --as user --params '{"xml_presentation_id":"<PRESENTATION_ID_FROM_PREVIOUS_JSON>"}' --data '{
   "slide": {
     "content": "<slide xmlns=\"http://www.larkoffice.com/sml/2.0\"><style><fill><fillColor color=\"rgb(245, 245, 245)\"/></fill></style><data><shape type=\"text\" topLeftX=\"80\" topLeftY=\"72\" width=\"760\" height=\"90\"><content textType=\"title\"><p>2024 Q3 季度复盘</p></content></shape><shape type=\"text\" topLeftX=\"80\" topLeftY=\"190\" width=\"520\" height=\"220\"><content textType=\"body\"><p>关键结论</p><ul><li><p>收入增长 30%</p></li><li><p>重点项目全部上线</p></li><li><p>用户满意度持续提升</p></li></ul></content></shape><shape type=\"rect\" topLeftX=\"660\" topLeftY=\"180\" width=\"180\" height=\"140\"><fill><fillColor color=\"rgba(100, 149, 237, 0.25)\"/></fill><border color=\"rgb(100, 149, 237)\" width=\"2\"/></shape></data><note><content textType=\"body\"><p>讲述时先给结论，再补充数据。</p></content></note></slide>"
   }
@@ -53,12 +53,12 @@ lark-cli slides xml_presentations get --as user --params '{
 }'
 ```
 
-提取 XML 内容：
+解析返回 JSON 的 `data.xml_presentation.content`：
 
 ```bash
 lark-cli slides xml_presentations get --as user --params '{
   "xml_presentation_id": "slides_example_presentation_id"
-}' | jq -r '.data.xml_presentation.content'
+}'
 ```
 
 预期返回结构：
@@ -140,18 +140,19 @@ lark-cli slides xml_presentation.slide delete --as user --params '{
 </slide>
 ```
 
-先创建演示文稿：
+先创建演示文稿，并解析返回 JSON 的 `data.xml_presentation_id`：
 
 ```bash
-PRESENTATION_ID=$(lark-cli slides +create --title "从文件添加页面" | jq -r '.data.xml_presentation_id')
+lark-cli slides +create --title "从文件添加页面" --format json
 ```
 
-再用 `jq` 组装请求体，从文件添加页面：
+再使用工作区文件工具把 XML 序列化到 `./slide-request.json` 的
+`slide.content` 字段，从文件添加页面：
 
 ```bash
 lark-cli slides xml_presentation.slide create --as user \
-  --params "{\"xml_presentation_id\":\"$PRESENTATION_ID\"}" \
-  --data "$(jq -n --arg content "$(cat slide.xml)" '{slide:{content:$content}}')"
+  --params '{"xml_presentation_id":"<PRESENTATION_ID_FROM_PREVIOUS_JSON>"}' \
+  --data @./slide-request.json
 ```
 
 ## 示例 7: +replace-slide + block_insert 给已有页加图
@@ -159,19 +160,14 @@ lark-cli slides xml_presentation.slide create --as user \
 只想在已有页上加一张图、不动其他元素——走 shortcut `+replace-slide`，`block_insert` 追加到页末（或用 `insert_before_block_id` 指定位置）。
 
 ```bash
-PID="slides_example_presentation_id"
-SID="slide_example_id"
+# 1. 上传图片并解析返回 JSON 的 data.file_token
+lark-cli slides +media-upload --file ./pic.png --presentation <PRESENTATION_ID> --as user
 
-# 1. 上传图片拿 file_token
-TOKEN=$(lark-cli slides +media-upload --file ./pic.png --presentation "$PID" --as user \
-  | jq -r '.data.file_token')
-
-# 2. block_insert 到页面末尾（省略 insert_before_block_id）
+# 2. 使用工作区文件工具把 file_token 序列化到 ./parts.json，再 block_insert
 # 注：<img .../> 是自闭合标签，CLI 不会展开（只有 <shape/> 会被补 <content/>）
 lark-cli slides +replace-slide --as user \
-  --presentation "$PID" --slide-id "$SID" \
-  --parts "$(jq -n --arg token "$TOKEN" \
-    '[{action:"block_insert",insertion:("<img src=\""+$token+"\" topLeftX=\"500\" topLeftY=\"100\" width=\"200\" height=\"150\"/>")}]')"
+  --presentation <PRESENTATION_ID> --slide-id <SLIDE_ID> \
+  --parts @./parts.json
 ```
 
 预期返回：
@@ -229,32 +225,26 @@ lark-cli slides +replace-slide --as user \
 ```bash
 lark-cli slides xml_presentations get --as user --params '{
   "xml_presentation_id": "slides_example_presentation_id"
-}' | jq '.data.xml_presentation.revision_id'
+}'
 ```
+
+直接解析返回 JSON 的 `data.xml_presentation.revision_id`。
 
 ### 批量插入多页
 
+使用工作区文件工具分别生成 `./slide-1.json`、`./slide-2.json` 等请求体，
+再按最终顺序逐页调用：
+
 ```bash
-#!/bin/bash
-
-PRESENTATION_ID="slides_example_presentation_id"
-
-slides=(
-  '<slide xmlns="http://www.larkoffice.com/sml/2.0"><data><shape type="text" topLeftX="80" topLeftY="80" width="800" height="120"><content textType="title"><p>页面 1</p></content></shape></data></slide>'
-  '<slide xmlns="http://www.larkoffice.com/sml/2.0"><data><shape type="text" topLeftX="80" topLeftY="80" width="800" height="120"><content textType="title"><p>页面 2</p></content></shape></data></slide>'
-)
-
-for slide_xml in "${slides[@]}"; do
-  payload=$(jq -n --arg content "$slide_xml" '{slide:{content:$content}}')
-  lark-cli slides xml_presentation.slide create --as user --params "{\"xml_presentation_id\":\"$PRESENTATION_ID\"}" --data "$payload"
-done
+lark-cli slides xml_presentation.slide create --as user \
+  --params '{"xml_presentation_id":"slides_example_presentation_id"}' \
+  --data @./slide-1.json
 ```
 
 ### 本地校验 XML 基本语法
 
-```bash
-xmllint --noout presentation.xml
-```
+使用 workspace dependency Python 的标准库 XML 解析器校验 `presentation.xml`；
+Windows 使用 `py -3`，macOS/Linux 使用 `python3`，不要依赖 `xmllint`。
 
 ### 真实示例
 

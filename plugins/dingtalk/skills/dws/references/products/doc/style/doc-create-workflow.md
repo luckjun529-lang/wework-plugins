@@ -220,8 +220,8 @@ callout 可通过 `"showstk": true, "sticker": "图标名"` 配置顶部贴纸�
 
 | 策略 | 条件 | 执行流程 |
 |------|------|----------|
-| **直接 JSONML** | 短文档（≤ 15 块级节点）且结构简单 | 在 `/tmp/<name>.json` 手写完整 JSONML 树 → `doc create --content-format jsonml` |
-| **Markdown 脚手架 + JSONML 精修** | 长文档且结构较线性 | ① Markdown 建立内容骨架 → `doc create --content-format markdown` ② `doc read --node <id> --content-format jsonml --output /tmp/<name>.json` 拉回 JSONML（已含 uuid） ③ **Read `<name>-rfc.md` + `<name>-design.md`** 回顾规划 ④ 逐章对照执行结构变换 + 叠加样式 |
+| **直接 JSONML** | 短文档（≤ 15 块级节点）且结构简单 | 在 `<temp-dir>/<name>.json` 手写完整 JSONML 树 → `doc create --content-format jsonml` |
+| **Markdown 脚手架 + JSONML 精修** | 长文档且结构较线性 | ① Markdown 建立内容骨架 → `doc create --content-format markdown` ② `doc read --node <id> --content-format jsonml --output <temp-dir>/<name>.json` 拉回 JSONML（已含 uuid） ③ **Read `<name>-rfc.md` + `<name>-design.md`** 回顾规划 ④ 逐章对照执行结构变换 + 叠加样式 |
 | **直接 JSONML 分段构造** | 长文档且含大量富结构 | 按章节分段构造 JSONML，每段写完校验通过后再写下一段，最后拼接 |
 
 > **脚手架策略警示**：Markdown 无法表达分栏/callout/色彩表头，拉回的 JSONML 只有纯文本骨架。精修阶段不是“在现有结构上加色”，而是“参照 RFC/Spec 重组结构”。
@@ -295,20 +295,20 @@ callout 可通过 `"showstk": true, "sticker": "图标名"` 配置顶部贴纸�
 ### 写入
 
 ```bash
-dws doc create --name "<文档名>" --content-file /tmp/<name>.json --content-format jsonml
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.json --content-format jsonml
 ```
 
 ### 回读验收
 
 ```bash
-dws doc read --node <nodeId> --content-format jsonml --output /tmp/<name>-readback.json
+dws doc read --node <nodeId> --content-format jsonml --output <temp-dir>/<name>-readback.json
 ```
 
 ---
 
 ## 正文准备（未命中 JSONML 判定时）
 
-正文草稿先在本地临时 Markdown 文件中完成，推荐路径形如 `/tmp/<name>.md`。
+正文草稿先在本地临时 Markdown 文件中完成，推荐路径形如 `<temp-dir>/<name>.md`。
 
 准备规则：
 
@@ -320,26 +320,26 @@ dws doc read --node <nodeId> --content-format jsonml --output /tmp/<name>-readba
 - 同类信息保持一致：风险、状态、行动项各用一种元素 + 一种视觉语义（style-guideline §1.2 / §5）。
 - 临时文件必须保留真实换行，不能把换行写成字面量 `\n`。
 - Markdown 草稿阶段**不要**写 callout / 分栏 / 附件——这些留到「创建后的精修」用 `doc block insert` 操作（style-guideline §1.3）。
-- **图片素材闭环（硬规则）**：正文需求含图片/截图/图文并茂时，**禁止**在 Markdown 中写 `![](...)` 图片语法（包括真实存在的 alidocs URL）。正确做法：Markdown 只写文本骨架和图片占位说明（如 `📌 此处插入：xxx 产品截图`），创建文档后逐个执行 `dws doc media insert --node <nodeId> --file <本地图片路径>` 插入，最后用 `dws doc block list --node <nodeId>` 验证图片块存在。图片来源如果是钉盘文件，必须先 `dws drive download --node <图片nodeId> --output /tmp/xxx.png` 下载到本地再 insert。
+- **图片素材闭环（硬规则）**：正文需求含图片/截图/图文并茂时，**禁止**在 Markdown 中写 `![](...)` 图片语法（包括真实存在的 alidocs URL）。正确做法：Markdown 只写文本骨架和图片占位说明（如 `📌 此处插入：xxx 产品截图`），创建文档后逐个执行 `dws doc media insert --node <nodeId> --file <本地图片路径>` 插入，最后用 `dws doc block list --node <nodeId>` 验证图片块存在。图片来源如果是钉盘文件，必须先 `dws drive download --node <图片nodeId> --output <temp-dir>/xxx.png` 下载到本地再 insert。
 
 ## 创建写入
 
 优先用 `--content-file` 一次创建并写入：
 
 ```bash
-dws doc create --name "<文档名>" --content-file /tmp/<name>.md --content-format markdown
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.md --content-format markdown
 ```
 
 创建到指定文件夹：
 
 ```bash
-dws doc create --name "<文档名>" --content-file /tmp/<name>.md --folder <DOC_FOLDER_NODE_ID> --content-format markdown
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.md --folder <DOC_FOLDER_NODE_ID> --content-format markdown
 ```
 
 创建到知识库：
 
 ```bash
-dws doc create --name "<文档名>" --content-file /tmp/<name>.md --workspace <WS_ID> --content-format markdown
+dws doc create --name "<文档名>" --content-file <temp-dir>/<name>.md --workspace <WS_ID> --content-format markdown
 ```
 
 短纯文本才允许直接传 `--content`：
@@ -383,11 +383,11 @@ DWS 写入管道会自动处理长内容分片。只有出现以下情况才手�
 补救流程：
 
 1. 用 `doc read` 确认已经写到哪个章节。
-2. 从原始临时 Markdown 中截取缺失部分，写入 `/tmp/<name>-resume.md`。
+2. 从原始临时 Markdown 中截取缺失部分，写入 `<temp-dir>/<name>-resume.md`。
 3. 追加缺失内容：
 
 ```bash
-dws doc update --node <nodeId> --content-file /tmp/<name>-resume.md --mode append --content-format markdown
+dws doc update --node <nodeId> --content-file <temp-dir>/<name>-resume.md --mode append --content-format markdown
 ```
 
 4. 再次 `doc read`，确认缺失章节已补齐。

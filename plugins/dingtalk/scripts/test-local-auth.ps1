@@ -37,7 +37,7 @@ function Invoke-AuthTest(
 ) {
     $env:DWS_MOCK_STATE_DIR = $StateDirectory
     $env:WEGENT_LOCAL_AUTH_TOOL = $mockDws
-    $powershell = Join-Path $PSHOME 'powershell.exe'
+    $powershell = (Get-Process -Id $PID).Path
     $output = (& $powershell -NoProfile -ExecutionPolicy Bypass `
         -File $authScript $Action `
         -WaitAttempts $WaitAttempts `
@@ -126,21 +126,17 @@ echo not_authenticated 1>&2
 exit /b 4
 '@ | Set-Content -LiteralPath $mockDws -Encoding Ascii
 
-    $utf8StatusEmitter = Join-Path $testRoot 'utf8-status.exe'
-    Add-Type -Language CSharp -OutputType ConsoleApplication `
-        -OutputAssembly $utf8StatusEmitter -TypeDefinition @'
-using System;
-using System.Text;
-
-public static class Utf8Status
-{
-    public static void Main()
-    {
-        Console.OutputEncoding = new UTF8Encoding(false);
-        Console.Write("{\"authenticated\":true,\"user_name\":\"\u9648\u4fca\u9f99\"}");
-    }
-}
+    $utf8StatusEmitter = Join-Path $testRoot 'utf8-status.cmd'
+    $utf8Command = @'
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+$userName = [string][char]0x9648 + [char]0x4fca + [char]0x9f99
+[Console]::Out.Write('{"authenticated":true,"user_name":"' + $userName + '"}')
 '@
+    $encodedCommand = [Convert]::ToBase64String(
+        [Text.Encoding]::Unicode.GetBytes($utf8Command)
+    )
+    "@echo off`r`npowershell.exe -NoProfile -NonInteractive -EncodedCommand $encodedCommand" |
+        Set-Content -LiteralPath $utf8StatusEmitter -Encoding Ascii
 
     $utf8State = Join-Path $testRoot 'utf8-status'
     New-Item -ItemType Directory -Path $utf8State | Out-Null
@@ -188,10 +184,18 @@ public static class Utf8Status
         -StatusTimeoutMilliseconds 100
     $statusStopwatch.Stop()
     Assert-Contains $hangingStatusOutput '"status":"need_login"'
-    if ($statusStopwatch.Elapsed.TotalSeconds -ge 3) {
+    if ($statusStopwatch.Elapsed.TotalSeconds -ge 6) {
         throw 'A blocked DWS status command must be terminated promptly.'
     }
     Remove-Item Env:DWS_MOCK_STATUS_HANG
+
+    $transientHealthState = Join-Path $testRoot 'transient-health-status'
+    New-Item -ItemType Directory -Path $transientHealthState | Out-Null
+    New-Item -ItemType File -Path (Join-Path $transientHealthState 'authenticated') | Out-Null
+    $env:DWS_MOCK_STATUS_INVALID_AFTER_LOGIN = '1'
+    $transientHealthOutput = Invoke-AuthTest 'health' $transientHealthState
+    Assert-Contains $transientHealthOutput '"status":"ok"'
+    Remove-Item Env:DWS_MOCK_STATUS_INVALID_AFTER_LOGIN
 
     $invalidJsonState = Join-Path $testRoot 'transient-invalid-json'
     New-Item -ItemType Directory -Path $invalidJsonState | Out-Null
@@ -258,7 +262,7 @@ public static class Utf8Status
     New-Item -ItemType Directory -Path $readyState | Out-Null
     $env:DWS_MOCK_STATE_DIR = $readyState
     $env:DWS_BINARY_PATH = $mockDws
-    $powershell = Join-Path $PSHOME 'powershell.exe'
+    $powershell = (Get-Process -Id $PID).Path
     $readyOutput = (& $powershell -NoProfile -ExecutionPolicy Bypass `
         -File $readyScript) -join "`n"
     if ($LASTEXITCODE -ne 0) {

@@ -45,7 +45,7 @@ Usage:
 Example:
   dws doc download --node <NODE_ID>
   dws doc download --node <NODE_ID> --output ./report.pdf
-  dws doc download --node "https://alidocs.dingtalk.com/i/nodes/<DOC_UUID>" --output ~/downloads/
+  dws doc download --node "https://alidocs.dingtalk.com/i/nodes/<DOC_UUID>" --output <output-dir>
 Flags:
       --node string     文件节点 ID 或 URL (必填)
       --output string   本地保存路径 (文件路径或目录，必填)
@@ -179,7 +179,7 @@ dws doc upload --file ./data.xlsx --workspace <WS_ID> --convert
 
 # ── download（仅限非 ALIDOC 文件）──
 # 自动推断文件名，下到目录
-dws doc download --node <NODE_ID> --output ~/downloads/
+dws doc download --node <NODE_ID> --output <output-dir>
 
 # 指定文件路径
 dws doc download --node <NODE_ID> --output ./report.pdf

@@ -109,12 +109,7 @@ dws aitable record query-empty --base-id BASE --table-id TBL
 # 翻页
 dws aitable record query-empty --base-id BASE --table-id TBL --cursor <上次的nextCursor>
 
-# 把整表扫完（手动循环 cursor）
-NC=""
-while : ; do
-  R=$(dws aitable record query-empty --base-id BASE --table-id TBL ${NC:+--cursor "$NC"} --format json)
-  echo "$R" | jq '.data.records[] | .recordId'
-  NC=$(echo "$R" | jq -r '.data.nextCursor // empty')
-  [ -z "$NC" ] && break
-done
+# 把整表扫完：解析本页 JSON 的 data.records 与 data.nextCursor；
+# nextCursor 非空时，把它作为下一次 --cursor 参数继续调用，直到为空。
+dws aitable record query-empty --base-id BASE --table-id TBL --cursor <NEXT_CURSOR> --format json
 ```

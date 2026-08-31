@@ -17,7 +17,7 @@
 | 图片来源 | 获取方式 |
 |---------|---------|
 | 本地文件 | 直接使用 |
-| 网络 URL | `curl -L -o photo.jpg "<URL>"` |
+| 网络 URL | 使用工作区文件下载能力保存到 CWD |
 | 文档中的图片 token | `lark-cli docs +media-download --token <token> --output ./photo.png` |
 | 其他域的 Drive token | `lark-cli docs +media-download --token <token> --output ./photo.png` |
 

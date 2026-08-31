@@ -246,6 +246,7 @@ dws aitable advperm role-delete --base-id BASE_ID --role-id ROLE_ID --yes --form
 ### 关闭高级权限（恢复全员可见）
 
 ```bash
-dws aitable advperm role-list --base-id BASE_ID --format json > /tmp/roles-backup.json
+# 运行后用工作区文件工具把返回 JSON 保存为 <temp-dir>/roles-backup.json
+dws aitable advperm role-list --base-id BASE_ID --format json
 dws aitable advperm disable --base-id BASE_ID --yes --format json
 ```

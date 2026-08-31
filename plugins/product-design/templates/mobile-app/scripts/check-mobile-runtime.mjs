@@ -8,6 +8,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const lockPath = path.join(root, "mobile-runtime.lock.json");
 const lockedFiles = JSON.parse(readFileSync(lockPath, "utf8"));
 const failures = [];
+const textExtensions = new Set([".css", ".js", ".json", ".mjs", ".svg", ".ts", ".tsx"]);
+
+function hashProtectedFile(filePath) {
+  const content = readFileSync(filePath);
+  if (!textExtensions.has(path.extname(filePath))) return content;
+  return Buffer.from(content.toString("utf8").replace(/\r\n/gu, "\n"), "utf8");
+}
 
 for (const [relativePath, expectedHash] of Object.entries(lockedFiles)) {
   const filePath = path.join(root, relativePath);
@@ -17,7 +24,7 @@ for (const [relativePath, expectedHash] of Object.entries(lockedFiles)) {
     continue;
   }
 
-  const actualHash = createHash("sha256").update(readFileSync(filePath)).digest("hex");
+  const actualHash = createHash("sha256").update(hashProtectedFile(filePath)).digest("hex");
   if (actualHash !== expectedHash) {
     failures.push(`${relativePath} was modified`);
   }

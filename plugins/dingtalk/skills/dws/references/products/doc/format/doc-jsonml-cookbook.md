@@ -7,7 +7,7 @@
 ## 决策型文档骨架范例（doc create 用）
 
 以下是一个"方案对比汇报"的完整 JSONML 文件内容，展示摘要 callout + 彩色表格 + 状态高亮。
-**可直接复制到 `/tmp/<name>.json` 后用 `dws doc create --name "..." --content-file /tmp/<name>.json --content-format jsonml` 创建。**
+**可直接复制到 `<temp-dir>/<name>.json` 后用 `dws doc create --name "..." --content-file <temp-dir>/<name>.json --content-format jsonml` 创建。**
 
 ```json
 ["root", {},

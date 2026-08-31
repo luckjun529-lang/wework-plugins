@@ -38,17 +38,21 @@ lark-cli slides xml_presentations get --as user --params '<json_params>'
 lark-cli slides xml_presentations get --as user --params '{"xml_presentation_id":"slides_example_presentation_id"}'
 ```
 
-### 结合 jq 格式化输出
+### 提取 XML 内容
 
 ```bash
-lark-cli slides xml_presentations get --as user --params '{"xml_presentation_id":"slides_example_presentation_id"}' | jq -r '.data.xml_presentation.content'
+lark-cli slides xml_presentations get --as user --params '{"xml_presentation_id":"slides_example_presentation_id"}'
 ```
+
+直接解析返回 JSON 的 `data.xml_presentation.content`。
 
 ### 保存到文件
 
 ```bash
-lark-cli slides xml_presentations get --as user --params '{"xml_presentation_id":"slides_example_presentation_id"}' > presentation_data.json
+lark-cli slides xml_presentations get --as user --params '{"xml_presentation_id":"slides_example_presentation_id"}'
 ```
+
+使用工作区文件工具把返回 JSON 保存为 `./presentation_data.json`，不要依赖 shell 重定向。
 
 ## 返回值
 

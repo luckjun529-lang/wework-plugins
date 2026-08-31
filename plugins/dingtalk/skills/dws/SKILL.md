@@ -43,6 +43,13 @@ metadata:
 安装的 DWS 对辅助脚本可见。不要直接调用 PATH 中来源不明的命令，也不要绕过
 包装器改用 curl、HTTP API 或浏览器自动化。
 
+### 跨平台命令硬规则
+
+- 参考文档中的反斜杠换行是 macOS/Linux 的展示写法；Windows PowerShell 执行时必须合并成单行，不能把 `\` 当续行符。
+- 临时文件统一写成 `<temp-dir>\<name>`：Windows 用 `[System.IO.Path]::GetTempPath()` 取得目录，macOS/Linux 用 `${TMPDIR:-/tmp}`。不要硬编码 `/tmp`。
+- 禁止依赖 heredoc、`cat`、`grep`、`head`、`tail`、`sed`、`awk` 或 `jq`。使用工作区文件工具生成输入文件，使用 CLI 的 `--format json`/`--output` 参数，并在内存中解析结果。
+- 路径参数必须作为独立参数传给包装器；含空格的 Windows 路径需要完整引用，不得通过字符串拼接后再执行。
+
 本文件基于 DingTalk Workspace CLI Skill 修改，增加了 Wegent 本地安装与认证
 适配；原始版权和许可证见同目录 `NOTICE` 与 `LICENSE`。
 

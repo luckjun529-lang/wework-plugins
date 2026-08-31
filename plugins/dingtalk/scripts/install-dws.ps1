@@ -4,11 +4,16 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'invoke-dws.ps1')
 
 if (-not [string]::IsNullOrWhiteSpace($env:DWS_BINARY_PATH) -and
     (Test-Path -LiteralPath $env:DWS_BINARY_PATH -PathType Leaf)) {
-    & $env:DWS_BINARY_PATH version *> $null
-    if ($LASTEXITCODE -eq 0) {
+    $configuredExitCode = -1
+    Invoke-NativeCommand `
+        -Command { & $env:DWS_BINARY_PATH version } `
+        -ExitCode ([ref]$configuredExitCode) `
+        -DiscardOutput
+    if ($configuredExitCode -eq 0) {
         if ($PrintPath) {
             Write-Output $env:DWS_BINARY_PATH
         }
@@ -26,8 +31,12 @@ function Test-Dws {
     if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) {
         return $false
     }
-    & $Executable version *> $null
-    return $LASTEXITCODE -eq 0
+    $exitCode = -1
+    Invoke-NativeCommand `
+        -Command { & $Executable version } `
+        -ExitCode ([ref]$exitCode) `
+        -DiscardOutput
+    return $exitCode -eq 0
 }
 
 function Resolve-Dws {
@@ -55,6 +64,9 @@ if ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant() -ne 'AMD64') {
 
 $archiveUrl = 'https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/releases/download/v1.0.58/dws-windows-amd64.zip'
 $expectedHash = 'b8c50d9111115eafdb466978f1dd8f9421bcc2d5fac848023108353dc5a236cb'
+# Older Windows PowerShell 5.1 hosts may otherwise negotiate TLS 1.0.
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) `
     ("wegent-dws-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null

@@ -11,8 +11,17 @@ Use the bundled deterministic CLI for repeatable DOCX operations. Keep source fi
 
 Prefer the Python executable returned by the workspace dependency loader. Otherwise use an available Python 3 executable. Set `SKILL_DIR` to this skill directory and invoke:
 
+On macOS/Linux use `python3`; on Windows PowerShell use `py -3` (or the
+workspace dependency loader's absolute `python.exe` path). On Windows set the
+skill directory with `$env:SKILL_DIR = '<skill-directory>'`. Every `python3`
+example below uses this platform-specific launcher substitution.
+
 ```bash
 python3 "$SKILL_DIR/scripts/bootstrap.py" <command> [arguments]
+```
+
+```powershell
+py -3 "$env:SKILL_DIR\scripts\bootstrap.py" <command> [arguments]
 ```
 
 The bootstrap reuses compatible workspace packages. When packages are missing, it installs the hashed lock file into `~/.wegent-executor/plugin-envs/wework-public/documents/`; it never installs globally.

@@ -20,11 +20,16 @@ Codex 插件。Skills 与官方 CLI `1.0.68` 保持版本配套。
   `~/.local/share/lark-cli` 下权限 `0600` 的 AES-GCM 加密文件。
 - 后续调用统一通过 `scripts/run-lark-cli.*`，包装器忽略外部 Connector
   注入的 Token、Brand 和 App ID 环境变量，只使用本机官方 CLI 配置。
+- Windows PowerShell 5.1 下，安装、授权和业务调用均通过原生命令兼容边界，
+  CLI 写入 stderr 的二维码/OAuth 进度不会绕过退出码处理。
 - 需要额外业务权限时，按照 `lark-shared` Skill 的最小权限规则增量 OAuth。
   高风险写操作仍由 CLI 的确认门禁保护，禁止自动追加 `--yes`。
 
 所有 Shell/PowerShell 包装脚本都按普通文件打包并由解释器调用，不依赖 ZIP
 保留可执行位。插件包不内置平台二进制或用户凭据。
+
+Windows 可运行 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-native-command.ps1`
+验证非零退出码与正常 stderr 的处理。
 
 ## 能力
 

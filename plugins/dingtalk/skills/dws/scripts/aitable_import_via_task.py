@@ -9,7 +9,7 @@
 用法:
     python scripts/aitable_import_via_task.py <baseId> <filePath>
     python scripts/aitable_import_via_task.py <baseId> <filePath> --timeout 30
-    python scripts/aitable_import_via_task.py <baseId> <filePath> --dws /tmp/dws
+    python scripts/aitable_import_via_task.py <baseId> <filePath> --dws DWS_EXECUTABLE_PATH
 """
 
 from __future__ import annotations
@@ -79,6 +79,7 @@ def main() -> None:
     parser.add_argument("file_path", help="待导入文件路径（.csv/.xlsx/.xls）")
     parser.add_argument("--timeout", type=int, default=30, help="import_data 等待秒数，默认 30")
     parser.add_argument("--dws", default="dws", help="dws 可执行文件路径，默认 dws")
+    parser.add_argument("--table-id", help="可选：把数据追加到指定的已有表")
     args = parser.parse_args()
 
     base_id = args.base_id.strip()
@@ -86,6 +87,8 @@ def main() -> None:
 
     if not validate_resource_id(base_id):
         fail("无效的 baseId 格式")
+    if args.table_id and not validate_resource_id(args.table_id):
+        fail("无效的 tableId 格式")
     if not file_path.exists() or not file_path.is_file():
         fail(f"文件不存在或不可读: {file_path}")
     if file_path.suffix.lower() not in ALLOWED_EXTENSIONS:
@@ -132,19 +135,22 @@ def main() -> None:
         fail(f"PUT 上传失败: {put_err}")
 
     print("[3/3] trigger import_data", file=sys.stderr)
+    import_args = [
+        "aitable",
+        "import",
+        "data",
+        "--import-id",
+        import_id,
+        "--timeout",
+        str(args.timeout),
+        "--format",
+        "json",
+    ]
+    if args.table_id:
+        import_args.extend(["--table-id", args.table_id])
     rc2, out2, err2 = run_dws(
         args.dws,
-        [
-            "aitable",
-            "import",
-            "data",
-            "--import-id",
-            import_id,
-            "--timeout",
-            str(args.timeout),
-            "--format",
-            "json",
-        ],
+        import_args,
         timeout_sec=max(120, args.timeout + 30),
     )
     if rc2 != 0:

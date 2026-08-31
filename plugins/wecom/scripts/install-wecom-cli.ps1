@@ -3,7 +3,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'invoke-native-command.ps1')
 
 $wecomVersion = '0.1.9'
 
@@ -15,8 +17,12 @@ function Test-WeComCli {
     if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) {
         return $false
     }
-    & $Executable --version *> $null
-    return $LASTEXITCODE -eq 0
+    $exitCode = -1
+    Invoke-NativeCommand `
+        -Command { & $Executable --version } `
+        -ExitCode ([ref]$exitCode) `
+        -DiscardOutput
+    return $exitCode -eq 0
 }
 
 function Resolve-WeComCli {
@@ -42,47 +48,84 @@ if ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant() -ne 'AMD64') {
     throw "The official WeCom CLI 0.1.9 manifest supports Windows x64, not $env:PROCESSOR_ARCHITECTURE."
 }
 
-$primaryUrl = 'https://p11-market.byteimg.com/tos-cn-i-17oceyzymr/binaries/wecom-cli/0.1.9/win32-x64-1783946896354509143.zip'
-$fallbackUrl = 'https://p16-market-sg.ibyteimg.com/tos-alisg-i-qmhakdvxf5-sg/binaries/wecom-cli/0.1.9/win32-x64-1784086407740594051.zip'
-$expectedHash = '28e30dbff4d29634ccf3b1efbfbf98fa43ecc3f23bf147eee1458d8e5e2d9416'
+$downloadSources = @(
+    [PSCustomObject]@{
+        Uri = 'https://registry.npmjs.org/@wecom/cli-win32-x64/-/cli-win32-x64-0.1.9.tgz'
+        Hash = '9803e8deab1e5ad6877fc21679a07c562fda0d3b389c4839dfdaf0ea49ef549c'
+        Archive = 'tar_gz'
+    },
+    [PSCustomObject]@{
+        Uri = 'https://p11-market.byteimg.com/tos-cn-i-17oceyzymr/binaries/wecom-cli/0.1.9/win32-x64-1783946896354509143.zip'
+        Hash = '28e30dbff4d29634ccf3b1efbfbf98fa43ecc3f23bf147eee1458d8e5e2d9416'
+        Archive = 'zip'
+    }
+)
+# Older Windows PowerShell 5.1 hosts may otherwise negotiate TLS 1.0.
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) `
     ("wegent-wecom-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null
 
 try {
-    $archivePath = Join-Path $temporaryDirectory 'wecom-cli.zip'
-    $downloaded = $false
-    foreach ($uri in @($primaryUrl, $fallbackUrl)) {
+    $source = $null
+    $lastError = $null
+    foreach ($downloadSource in $downloadSources) {
+        $archivePath = Join-Path $temporaryDirectory `
+            $(if ($downloadSource.Archive -eq 'zip') { 'wecom-cli.zip' } else { 'wecom-cli.tgz' })
         for ($attempt = 1; $attempt -le 3; $attempt++) {
             try {
-                Invoke-WebRequest -Uri $uri -OutFile $archivePath -UseBasicParsing
-                $downloaded = $true
+                Invoke-WebRequest -Uri $downloadSource.Uri -OutFile $archivePath `
+                    -UseBasicParsing -TimeoutSec 30
+                $actualHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+                if ($actualHash -ne $downloadSource.Hash) {
+                    throw 'The downloaded WeCom CLI archive failed SHA-256 verification.'
+                }
+
+                $expandedPath = Join-Path $temporaryDirectory 'expanded'
+                if (Test-Path -LiteralPath $expandedPath) {
+                    Remove-Item -LiteralPath $expandedPath -Recurse -Force
+                }
+                New-Item -ItemType Directory -Path $expandedPath | Out-Null
+                if ($downloadSource.Archive -eq 'zip') {
+                    Expand-Archive -LiteralPath $archivePath -DestinationPath $expandedPath
+                } else {
+                    $tar = Get-Command tar.exe -ErrorAction SilentlyContinue
+                    if ($null -eq $tar) {
+                        throw 'tar.exe is required to unpack the official WeCom npm package.'
+                    }
+                    $tarExitCode = -1
+                    Invoke-NativeCommand `
+                        -Command { & $tar.Source -xzf $archivePath -C $expandedPath } `
+                        -ExitCode ([ref]$tarExitCode) `
+                        -DiscardOutput
+                    if ($tarExitCode -ne 0) {
+                        throw 'The official WeCom npm package could not be unpacked.'
+                    }
+                }
+                $source = Get-ChildItem -LiteralPath $expandedPath `
+                    -Filter wecom-cli.exe -Recurse | Select-Object -First 1
+                if ($null -eq $source) {
+                    throw 'The verified archive did not contain wecom-cli.exe.'
+                }
+                $lastError = $null
                 break
             } catch {
+                $lastError = $_
                 if ($attempt -lt 3) {
                     Start-Sleep -Seconds ([Math]::Min($attempt * 2, 6))
                 }
             }
         }
-        if ($downloaded) {
+        if ($null -ne $source) {
             break
         }
     }
-    if (-not $downloaded) {
-        throw 'Both official WeCom CLI download mirrors failed.'
-    }
-
-    $actualHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($actualHash -ne $expectedHash) {
-        throw 'The downloaded WeCom CLI archive failed SHA-256 verification.'
-    }
-
-    $expandedPath = Join-Path $temporaryDirectory 'expanded'
-    Expand-Archive -LiteralPath $archivePath -DestinationPath $expandedPath
-    $source = Get-ChildItem -LiteralPath $expandedPath -Filter wecom-cli.exe -Recurse |
-        Select-Object -First 1
     if ($null -eq $source) {
-        throw 'The verified archive did not contain wecom-cli.exe.'
+        if ($null -ne $lastError) {
+            throw $lastError
+        }
+        throw 'All official WeCom CLI download sources failed.'
     }
 
     $installDirectory = Join-Path $env:LOCALAPPDATA `
@@ -97,4 +140,3 @@ try {
 } finally {
     Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction SilentlyContinue
 }
-

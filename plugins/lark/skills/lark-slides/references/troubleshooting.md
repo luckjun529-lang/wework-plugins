@@ -60,4 +60,4 @@
 
 - 图片上传、`@path` 占位符、`file_token`：见 [lark-slides-media-upload.md](lark-slides-media-upload.md) 和 [lark-slides-create.md](lark-slides-create.md)。
 - 块级替换、`block_id`、3350001 replace 细节：见 [lark-slides-replace-slide.md](lark-slides-replace-slide.md)。
-- 原生 `slide.create` 包装、`before_slide_id` 和 jq 模板：见 [lark-slides-xml-presentation-slide-create.md](lark-slides-xml-presentation-slide-create.md)。
+- 原生 `slide.create` 包装、`before_slide_id` 和 JSON 文件模板：见 [lark-slides-xml-presentation-slide-create.md](lark-slides-xml-presentation-slide-create.md)。

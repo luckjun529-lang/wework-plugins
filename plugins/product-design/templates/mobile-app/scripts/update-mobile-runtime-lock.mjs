@@ -6,6 +6,14 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const lockPath = path.join(root, "mobile-runtime.lock.json");
+const textExtensions = new Set([".css", ".js", ".json", ".mjs", ".svg", ".ts", ".tsx"]);
+
+function hashProtectedFile(filePath) {
+  const content = readFileSync(filePath);
+  if (!textExtensions.has(path.extname(filePath))) return content;
+  return Buffer.from(content.toString("utf8").replace(/\r\n/gu, "\n"), "utf8");
+}
+
 const protectedFiles = [
   "scripts/check-mobile-runtime.mjs",
   "scripts/prepare-sites-build.mjs",
@@ -41,7 +49,7 @@ const hashes = {};
 for (const relativePath of protectedFiles) {
   const filePath = path.join(root, relativePath);
   if (!existsSync(filePath)) throw new Error(`Protected runtime file is missing: ${relativePath}`);
-  hashes[relativePath] = createHash("sha256").update(readFileSync(filePath)).digest("hex");
+  hashes[relativePath] = createHash("sha256").update(hashProtectedFile(filePath)).digest("hex");
 }
 
 writeFileSync(lockPath, `${JSON.stringify(hashes, null, 2)}\n`);

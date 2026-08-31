@@ -28,11 +28,10 @@ lark-cli markdown +overwrite \
   --file-token boxcnxxxx \
   --content @./README.md
 
-# 用 stdin 覆盖
-printf '# Updated\n' | \
-  lark-cli markdown +overwrite \
-    --file-token boxcnxxxx \
-    --content -
+# 跨平台传递多行内容：先用工作区文件工具保存，再从文件读取
+lark-cli markdown +overwrite \
+  --file-token boxcnxxxx \
+  --content @./README.md
 
 # 预览底层请求
 lark-cli markdown +overwrite \
