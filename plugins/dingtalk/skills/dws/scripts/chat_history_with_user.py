@@ -18,13 +18,14 @@ import json
 import subprocess
 import argparse
 from typing import List, Any, Optional
+from dws_entry import command as dws_command
 
 
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Any]:
     """执行 dws 命令并解析 JSON 输出"""
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return None

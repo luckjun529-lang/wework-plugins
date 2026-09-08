@@ -63,6 +63,12 @@ if ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant() -ne 'AMD64') {
 }
 
 $archiveUrl = 'https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/releases/download/v1.0.58/dws-windows-amd64.zip'
+if (-not [string]::IsNullOrWhiteSpace($env:DWS_DOWNLOAD_BASE_URL)) {
+    if ($env:DWS_DOWNLOAD_BASE_URL -cnotmatch '^https://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._~%/-]*)?\z') {
+        throw 'DWS_DOWNLOAD_BASE_URL must be an HTTPS artifact base without credentials, query or fragment.'
+    }
+    $archiveUrl = $env:DWS_DOWNLOAD_BASE_URL.TrimEnd('/') + "/v$dwsVersion/dws-windows-amd64.zip"
+}
 $expectedHash = 'b8c50d9111115eafdb466978f1dd8f9421bcc2d5fac848023108353dc5a236cb'
 # Older Windows PowerShell 5.1 hosts may otherwise negotiate TLS 1.0.
 [Net.ServicePointManager]::SecurityProtocol = `
@@ -76,7 +82,7 @@ try {
     $lastError = $null
     for ($attempt = 1; $attempt -le 4; $attempt++) {
         try {
-            Invoke-WebRequest -Uri $archiveUrl -OutFile $archivePath -UseBasicParsing
+            Invoke-WebRequest -Uri $archiveUrl -OutFile $archivePath -UseBasicParsing -TimeoutSec 120
             $lastError = $null
             break
         } catch {

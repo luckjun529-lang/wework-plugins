@@ -21,6 +21,7 @@ import subprocess
 import argparse
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional, Tuple
+from dws_entry import command as dws_command
 
 TZ = timezone(timedelta(hours=8))
 SLOT_STEP_MIN = 30
@@ -29,7 +30,7 @@ SLOT_STEP_MIN = 30
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Any]:
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return None

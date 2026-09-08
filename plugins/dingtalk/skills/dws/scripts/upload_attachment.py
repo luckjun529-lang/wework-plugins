@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
+from dws_entry import command as dws_command
 
 RESOURCE_ID_PATTERN = re.compile(r'^[A-Za-z0-9_-]{8,128}$')
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
@@ -45,7 +46,7 @@ def detect_mime_type(file_path: Path) -> str:
 
 def run_dws(args: list) -> Optional[Dict[str, Any]]:
     """调用 dws 命令并返回解析后的 JSON 结果。"""
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:

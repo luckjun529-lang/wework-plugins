@@ -30,6 +30,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from dws_entry import command as dws_command
 
 ALLOWED_PRIORITIES = {10, 20, 30, 40}
 DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
@@ -39,7 +40,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Dict[str, Any]]:
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return {'dry_run': True}

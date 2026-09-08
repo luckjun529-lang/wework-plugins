@@ -1,0 +1,13 @@
+{
+  "sdk": "wegent-plugin-auth-python",
+  "version": "0.7.0",
+  "protocolVersion": 1,
+  "files": {
+    "configuration.py": "0bb293d2c82db21c5eb19a88cea884fa758700c4350e93baa238b87c5d5e08ae",
+    "transport.py": "664e4a848c9fea879f729a967191c37d7ab02a0180c0f02bced4cd62c4199c34",
+    "adapter.py": "c51549ca0e1503f6d714a52bdf6ddc265e4067aa8d4470e5c6c9077d10f5d8e6",
+    "__init__.py": "5d68135f2d302ba2c22de10ec66e8da86b57152b888fd3891be0dfcab67d7673",
+    "runtime.py": "c5b70046faf566b479fc40b7737ccbd840b0b5f66886fa836f0b5b4d3ec04653",
+    "LICENSE": "e7e430d6f6693d9e1fe09961d873d7c8f6938bfd57746d60d18b895c62b15760"
+  }
+}

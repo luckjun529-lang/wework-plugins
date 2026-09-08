@@ -1,7 +1,7 @@
 {
   "name": "dingtalk",
-  "version": "0.2.11",
-  "description": "通过本机已安装并完成认证的 DWS CLI，使用钉钉协作与办公能力。",
+  "version": "0.3.1",
+  "description": "通过 DWS 使用钉钉协作与办公能力。",
   "author": {
     "name": "Wegent"
   },
@@ -22,22 +22,55 @@
       "authPolicy": "on_install",
       "localAuth": {
         "kind": "browser_oauth",
-        "health": ["scripts/local-auth.sh", "health"],
-        "start": ["scripts/local-auth.sh", "login"],
-        "logout": ["scripts/local-auth.sh", "logout"],
+        "health": [
+          "scripts/local-auth.sh",
+          "health"
+        ],
+        "start": [
+          "scripts/local-auth.sh",
+          "login"
+        ],
+        "logout": [
+          "scripts/local-auth.sh",
+          "logout"
+        ],
         "timeoutSeconds": 300,
         "logoutOnUninstall": false,
         "tool": {
           "id": "dws",
           "source": "bundled"
         }
+      },
+      "accountAuth": {
+        "protocolVersion": 1,
+        "credentialType": "oauth2",
+        "adapter": "scripts/account-auth.py",
+        "oauth2": [
+          "refresh",
+          "revoke"
+        ],
+        "exportMode": "exclusive",
+        "localEnvironment": {
+          "DWS_CONFIG_DIR": {
+            "type": "directory"
+          },
+          "DWS_KEYCHAIN_DIR": {
+            "type": "directory"
+          },
+          "DWS_DISABLE_KEYCHAIN": {
+            "type": "enum",
+            "values": [
+              "1"
+            ]
+          }
+        }
       }
     }
   ],
   "interface": {
     "displayName": "钉钉",
-    "shortDescription": "通过本机 DWS 管理钉钉协作与办公能力",
-    "longDescription": "自动准备跨平台 DingTalk Workspace CLI，在本机浏览器完成 OAuth 授权，并支持 AI 表格、日历、通讯录、群聊、待办、审批、考勤、日志、DING、文档、云盘、AI 听记、邮箱、在线表格、知识库和开放平台文档等能力。凭据仅由本机 DWS 管理，不上传 Wegent Backend。",
+    "shortDescription": "通过 DWS 管理钉钉协作与办公能力",
+    "longDescription": "通过 DingTalk Workspace CLI 使用 AI 表格、日历、通讯录、群聊、待办、审批、考勤、日志、DING、文档、云盘、AI 听记、邮箱、在线表格、知识库和开放平台文档等能力。",
     "developerName": "Wegent",
     "category": "协作",
     "capabilities": [
@@ -52,7 +85,7 @@
     "composerIcon": "./assets/app-icon.svg",
     "logo": "./assets/app-icon.svg",
     "defaultPrompt": [
-      "请自动检查本机 DWS CLI 和钉钉登录状态，然后帮我处理钉钉中的日程、消息、文档、待办或其他办公任务。"
+      "请帮我处理钉钉中的日程、消息、文档、待办或其他办公任务。"
     ]
   }
 }

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "entrypoint": ".wework-build/dws-auth/package.py",
+  "outputs": [
+    "scripts/native"
+  ]
+}

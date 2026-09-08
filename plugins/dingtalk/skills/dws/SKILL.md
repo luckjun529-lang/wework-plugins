@@ -13,8 +13,9 @@ metadata:
 
 ## Wegent 本地运行与授权
 
-本插件不使用 Wegent Backend Connector，不允许向 Backend 上传、同步或保存
-钉钉 Token。DWS CLI 和 OAuth 登录态均位于当前用户的本机环境。
+账号认证迁移只能从 Wegent 原生插件界面发起。适配器通过私有通道完成加密暂存和
+唯一刷新权交接，云端仅在用户授权设备后使用账号。禁止模型读取、打印或转发 Token。
+尚未迁移的本机账号仍使用原有 DWS 登录态；云端和已迁移账号必须使用平台认证代理。
 
 从此 `SKILL.md` 向上两级定位插件根目录。每次新会话第一次调用钉钉能力前：
 
@@ -24,12 +25,19 @@ metadata:
   `powershell -NoProfile -ExecutionPolicy Bypass -File "<plugin-root>\scripts\ensure-dws-ready.ps1"`。
 
 安装器优先复用 PATH 中可用的 `dws`；没有时下载官方 DWS CLI，并在安装前
-校验官方清单中的 SHA-256。未登录时，准备脚本会执行
+校验官方清单中的 SHA-256。仅尚未迁移的本机账号，未登录时准备脚本会执行
 `dws auth login --format json`，由本机浏览器完成 OAuth 授权，并在确认登录态可用后
 结束准备流程。推荐 PAT 权限属于具体操作，不在安装或准备阶段预先申请；后续命令
 需要额外权限时按 DWS 返回的授权要求处理。只有浏览器授权、
 企业管理员权限、网络/VPN 等必须由用户处理时才暂停并说明所需操作。禁止要求
 用户在聊天中粘贴 Token，禁止读取、打印或上传本机 DWS 凭据文件。
+
+云端或已迁移账号的准备检查不会再次登录或下载安装原版 DWS。遇到
+`plugin_auth_device_not_granted`，先确认本机已有登录且本机和云端设备在线，等待后台同步后重试；
+持续失败时报告连接状态，不要求用户在页面迁移或授权设备。遇到
+`plugin_auth_account_selection_required`，用 `--account-id <corpId:userId>` 指定平台账号。
+不要通过 `auth login`、`profile switch`、`--profile` 或自定义二进制绕过这些状态。
+后文的本机 profile 管理仅适用于尚未迁移的账号。
 
 本 Skill 后文所有 `dws ...` 命令都是逻辑写法，实际执行必须经过插件包装器：
 
@@ -40,7 +48,7 @@ metadata:
 
 后文 `python scripts/<name>.py ...` 也必须使用相应的
 `<plugin-root>/scripts/run-python.sh` 或 `run-python.ps1` 包装器，以便本地
-安装的 DWS 对辅助脚本可见。不要直接调用 PATH 中来源不明的命令，也不要绕过
+辅助脚本使用同一账号认证入口。不要直接调用 PATH 中来源不明的命令，也不要绕过
 包装器改用 curl、HTTP API 或浏览器自动化。
 
 ### 跨平台命令硬规则

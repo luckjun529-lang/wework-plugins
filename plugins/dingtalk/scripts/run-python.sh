@@ -8,8 +8,6 @@ if [ "$#" -lt 1 ]; then
 fi
 
 DWS_SCRIPT_DIRECTORY="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DWS_EXECUTABLE="$(/bin/sh "${DWS_SCRIPT_DIRECTORY}/install-dws.sh")"
-DWS_BIN_DIRECTORY="$(dirname -- "${DWS_EXECUTABLE}")"
 
 if command -v python3 >/dev/null 2>&1; then
     DWS_PYTHON="$(command -v python3)"
@@ -20,5 +18,4 @@ else
     exit 3
 fi
 
-PATH="${DWS_BIN_DIRECTORY}:${PATH}" exec "${DWS_PYTHON}" "$@"
-
+exec "${DWS_PYTHON}" "$@"
