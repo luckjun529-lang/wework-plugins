@@ -39,8 +39,9 @@
     "dws-auth/overlay/provider_test.go": "e5dafac08e23b55e70ddd2b86c8ff2039b843dbdc0dd334badacb2b4e10adfb5",
     "dws-auth/package.py": "74327bded74f870895e8b85978d9005fce76e4816d046937ce72c6c431d00159",
     "dws-auth/tests/test_package.py": "6cb7f80caa1f3e1007f30d17b3302b61bbbd8aa9f57ca71b34acce16b62671e5",
+    "dws-auth/tests/test_toolchain.py": "c2306b7ffa0b52505f5cfff09096ad1449bb7e6c059e59dcd192a4c59b1ee889",
     "dws-auth/tests/test_vendor.py": "d24369c886f720bc9870391c50fec69a8e5d6ac61c68fc201e639719ed3627c5",
-    "dws-auth/toolchain.py": "90cd03e3f9d8c352b2d07edbe7b833f0d4cb0963aea8aaa51ba6474abdca652d",
+    "dws-auth/toolchain.py": "c265669d702c9529036bd088061ce9375ceefd83b3901cc3910b95c43e941232",
     "dws-auth/vendor.py": "32dfd6d53127e087cf6e7e2677529356cf65b2d338d441fa4a180121388ce700",
     "dws-auth/verify.py": "b25c33838595e728b3994d9779c610a25c836b0a01ca62661199567c02d9121b"
   }
