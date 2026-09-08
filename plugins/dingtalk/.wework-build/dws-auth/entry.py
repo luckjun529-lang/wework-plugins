@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import platform
+import subprocess
 import sys
 from pathlib import Path
 
@@ -53,6 +54,17 @@ def companion() -> Path:
     return executable
 
 
+def launch(executable: Path, arguments: list[str]) -> None:
+    command = [str(executable), *arguments]
+    if platform.system() == "Windows":
+        # CPython's os.execv uses the Windows CRT overlay implementation, which
+        # can let the launcher exit successfully before the child has finished.
+        # Wait explicitly so the host observes the native adapter's real status.
+        completed = subprocess.run(command, check=False)
+        raise SystemExit(completed.returncode)
+    os.execv(str(executable), command)
+
+
 if __name__ == "__main__":
     try:
         executable = companion()
@@ -61,8 +73,8 @@ if __name__ == "__main__":
         for name in ("DWS_CONFIG_DIR", "DWS_KEYCHAIN_DIR", "DWS_DISABLE_KEYCHAIN"):
             if name in settings:
                 os.environ[name] = settings[name]
-        # exec preserves the host's private stdin nonce and socket environment.
-        os.execv(str(executable), [str(executable), *sys.argv[1:]])
+        # The child inherits the host's private stdin nonce and socket environment.
+        launch(executable, sys.argv[1:])
     except (OSError, ValueError, KeyError, TypeError, AuthError):
         print(
             json.dumps({"status": "error", "code": "plugin_auth_package_sync_required"})

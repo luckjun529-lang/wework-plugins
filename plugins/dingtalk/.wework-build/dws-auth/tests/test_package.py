@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -9,7 +10,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "plugin-auth"))
 import package
+import entry
 import verify
 
 
@@ -168,6 +171,25 @@ class PackageTests(unittest.TestCase):
         binary.write_bytes(b"changed binary")
         with self.assertRaisesRegex(ValueError, "provenance mismatch"):
             verify.verify_artifacts(self.plugin, ("linux/amd64",))
+
+
+class EntryTests(unittest.TestCase):
+    def test_windows_launcher_waits_for_and_propagates_native_exit_code(self):
+        executable = Path("synthetic/dws-account-auth.exe")
+        with (
+            patch.object(entry.platform, "system", return_value="Windows"),
+            patch.object(
+                entry.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess([], 7),
+            ) as run,
+            self.assertRaises(SystemExit) as stopped,
+        ):
+            entry.launch(executable, ["run", "account-status"])
+        self.assertEqual(stopped.exception.code, 7)
+        run.assert_called_once_with(
+            [str(executable), "run", "account-status"], check=False
+        )
 
 
 class VerificationStateTests(unittest.TestCase):
