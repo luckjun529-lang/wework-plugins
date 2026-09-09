@@ -54,6 +54,12 @@ def identity(arguments):
 
 
 def business_args(arguments):
+    if (
+        arguments
+        and arguments[0] == "event"
+        and (len(arguments) < 2 or arguments[1] not in ("list", "schema"))
+    ):
+        raise AuthError("plugin_auth_local_event_required")
     if arguments == ["--ready"] or arguments[:2] == ["auth", "status"]:
         return ["account-status"]
     if not arguments or arguments[0] in {

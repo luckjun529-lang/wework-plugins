@@ -11,6 +11,8 @@
 
 始终通过 `scripts/run-lark-cli.sh` 或 Windows 的 `scripts/run-lark-cli.ps1` 调用业务命令。托管模式禁止 CLI 自行登录、修改配置或切换 profile。需要新增 scope 时，在来源设备通过 wrapper 发起 `auth login --scope ...` 或 `--domain ...`，再在 Wegent 原生连接界面重新连接。云端遇到权限不足时返回来源设备处理。写操作保留原 CLI 的确认规则。
 
+事件总线订阅依赖本地常驻进程及应用密钥，应在来源设备使用 `--as bot` 运行。托管调用仅开放 `event list` 和 `event schema`；不在云端启动后台事件进程。托管请求正文请使用参数或 `@文件`，不通过 stdin 传入。
+
 ## 认证边界
 
 用户刷新令牌与应用密钥仅进入私有适配器，不通过命令行、环境变量或业务输出传递。托管业务命令使用内存凭据提供器，禁用本地 keychain、用户插件与配置覆盖；携带凭据的 HTTP 请求只允许对应品牌的官方 HTTPS API。

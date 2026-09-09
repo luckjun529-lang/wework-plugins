@@ -42,7 +42,12 @@ class RuntimeTests(unittest.TestCase):
             lark_cli.identity(["im", "--as"])
 
     def test_managed_commands_cannot_start_a_second_login(self):
-        for args in (["auth", "login"], ["config", "init"], ["profile", "switch"]):
+        for args in (
+            ["auth", "login"],
+            ["config", "init"],
+            ["profile", "switch"],
+            ["event", "consume", "im.message.receive_v1"],
+        ):
             with self.assertRaises(AuthError):
                 lark_cli.business_args(args)
         self.assertEqual(lark_cli.business_args(["auth", "status"]), ["account-status"])

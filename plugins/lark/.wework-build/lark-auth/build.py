@@ -57,6 +57,19 @@ def prepare(directory, archive):
         + "\n// WegentAccess is set only in the native managed process.\nvar WegentAccess KeychainAccess\n",
         encoding="utf-8",
     )
+    # The bundled executable has a private dispatcher before the upstream CLI.
+    # Preserve the local event daemon's self-spawn entry point.
+    startup = root / "internal/event/consume/startup.go"
+    value = startup.read_text(encoding="utf-8")
+    old = "cmd := exec.Command(exe, args...)"
+    if value.count(old) != 1:
+        raise ValueError("Upstream event daemon boundary changed")
+    startup.write_text(
+        value.replace(
+            old, 'cmd := exec.Command(exe, append([]string{"local"}, args...)...)'
+        ),
+        encoding="utf-8",
+    )
     return root
 
 
@@ -80,7 +93,7 @@ def build(root, output, target):
         check=True,
     )
     content = raw.read_bytes()
-    output.write_bytes(lzma.compress(content, preset=9))
+    output.write_bytes(lzma.compress(content, preset=6))
     metadata = {
         "nativeProtocolVersion": 1,
         "target": target,

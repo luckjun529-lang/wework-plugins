@@ -25,6 +25,9 @@ func allowed(args []string) bool {
 	if len(args) == 0 || !products[args[0]] {
 		return false
 	}
+	if args[0] == "event" && (len(args) < 2 || (args[1] != "list" && args[1] != "schema")) {
+		return false
+	}
 	for _, arg := range args {
 		name := strings.SplitN(arg, "=", 2)[0]
 		switch name {
