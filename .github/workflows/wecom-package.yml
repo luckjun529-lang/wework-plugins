@@ -33,6 +33,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: '3.12'
+      - name: Verify committed assets before rebuilding
+        run: uv run --no-project python plugins/wecom/.wework-build/wecom-auth/package.py --plugin plugins/wecom --output .ci-artifacts/wecom-committed.zip
       - name: Select pinned compiler
         run: |
           rustup toolchain install 1.94.1 --profile minimal
