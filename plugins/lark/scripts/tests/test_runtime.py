@@ -170,7 +170,7 @@ class RuntimeTests(unittest.TestCase):
                 stdout=subprocess.PIPE,
             )
             try:
-                self.assertEqual(child.stdout.readline(), b"locked\n")
+                self.assertEqual(child.stdout.readline().rstrip(b"\r\n"), b"locked")
                 probe = subprocess.Popen(
                     [
                         sys.executable,
@@ -184,7 +184,7 @@ class RuntimeTests(unittest.TestCase):
                 self.assertIsNone(probe.poll())
                 child.communicate(timeout=5)
                 out, _ = probe.communicate(timeout=5)
-                self.assertEqual(out, b"entered\n")
+                self.assertEqual(out.rstrip(b"\r\n"), b"entered")
             finally:
                 if child.poll() is None:
                     child.kill()

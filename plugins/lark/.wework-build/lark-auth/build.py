@@ -42,7 +42,7 @@ def prepare(directory, archive):
     # Intercept every upstream keychain entry point in managed business mode,
     # including direct UAT helpers that bypass Factory.WithKeychain.
     path = root / "internal/keychain/keychain.go"
-    value = path.read_text()
+    value = path.read_text(encoding="utf-8")
     changes = {
         "func Get(service, account string) (string, error) {": "func Get(service, account string) (string, error) {\n if WegentAccess != nil { return WegentAccess.Get(service, account) }",
         "func Set(service, account, data string) error {": "func Set(service, account, data string) error {\n if WegentAccess != nil { return WegentAccess.Set(service, account, data) }",
@@ -54,7 +54,8 @@ def prepare(directory, archive):
         value = value.replace(old, new)
     path.write_text(
         value
-        + "\n// WegentAccess is set only in the native managed process.\nvar WegentAccess KeychainAccess\n"
+        + "\n// WegentAccess is set only in the native managed process.\nvar WegentAccess KeychainAccess\n",
+        encoding="utf-8",
     )
     return root
 
