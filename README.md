@@ -47,6 +47,25 @@ The `Windows compatibility` GitHub Actions workflow additionally parses every
 PowerShell script and runs the native Windows authorization/exit-code tests on
 `windows-latest`.
 
+## DingTalk builds
+
+DingTalk 0.3.1 declares its build in `plugins/dingtalk/.wework-build.json` and keeps
+all canonical SDK inputs inside `.wework-build/` in that plugin directory.
+GitHub-to-internal-repository mirroring therefore retains everything needed by
+the existing MR, package, test and automatic-release pipeline. No separate
+account-authentication edition or manual artifact selection is needed.
+
+```bash
+uv run --no-project --python 3.12 python plugins/dingtalk/.wework-build/dws-auth/vendor.py --check .
+uv run --no-project --python 3.12 python plugins/dingtalk/.wework-build/dws-auth/package.py --plugin plugins/dingtalk --output .ci-artifacts/dingtalk-account-auth.zip
+```
+
+Maintain generated inputs in Wegent and refresh them with `sdk/dws-auth/vendor.py`.
+The builder prepares pinned Go tools, preserves reviewed source, builds five native
+targets and exercises the private adapter. The ordinary official publishing command
+automatically runs this build; GitLab tests and releases the same resulting ZIP.
+The GitHub workflow remains an additional cross-platform build check.
+
 ## Adding a plugin
 
 1. Create `plugins/<slug>/` with a valid `.codex-plugin/plugin.json`.

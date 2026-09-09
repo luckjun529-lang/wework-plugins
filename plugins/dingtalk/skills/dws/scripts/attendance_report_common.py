@@ -103,7 +103,7 @@ def run_dws(args: list[str]) -> Any:
     if "--format" not in args:
         args = args + ["--format", "json"]
 
-    cmd = ["dws"] + args
+    cmd = [*dws_command()] + args
     try:
         result = subprocess.run(
             cmd,
@@ -747,6 +747,7 @@ _CALENDAR_BAND_COLORS = ("FFFFFF", "EDF2F9")
 # 考勤结果单元格条件配色（参考钉钉 previewStyleByValue 配置）
 # 规则按优先级排列，首个匹配命中即停止；无 color 键表示不填充背景色。
 import re as _re
+from dws_entry import command as dws_command
 
 _ATTEND_RESULT_STYLE_RULES: list[tuple["_re.Pattern[str]", str | None]] = [
     # 白底（红字加粗由字体控制）：周末 — POI index 9 WHITE (255,255,255)

@@ -21,6 +21,7 @@ import os
 import re
 from pathlib import Path
 from typing import Union, List, Dict, Any, Optional, Tuple
+from dws_entry import command as dws_command
 
 JsonData = Union[List[Any], Dict[str, Any]]
 RecordDict = Dict[str, str]
@@ -147,7 +148,7 @@ def run_dws(args: List[str]) -> Optional[Dict[str, Any]]:
     if not args:
         print('错误：空命令')
         return None
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     try:
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=120

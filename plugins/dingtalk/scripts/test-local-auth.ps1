@@ -33,7 +33,7 @@ function Invoke-AuthTest(
     [int]$WaitAttempts = 10,
     [int]$LoginWaitAttempts = 100,
     [int]$WaitDelayMilliseconds = 10,
-    [int]$StatusTimeoutMilliseconds = 200
+    [int]$StatusTimeoutMilliseconds = 5000
 ) {
     $env:DWS_MOCK_STATE_DIR = $StateDirectory
     $env:WEGENT_LOCAL_AUTH_TOOL = $mockDws

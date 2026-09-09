@@ -1,0 +1,4 @@
+# Preserve the exact bytes used by the vendored SDK inventories on Windows.
+.wework-build/** text eol=lf
+scripts/wegent_plugin_auth/** text eol=lf
+scripts/account-auth.py text eol=lf

@@ -12,6 +12,7 @@ import json
 import subprocess
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+from dws_entry import command as dws_command
 
 PAGE_SIZE = 50
 MAX_PAGES = 10
@@ -21,7 +22,7 @@ PRIORITY_MAP = {10: '低', 20: '普通', 30: '较高', 40: '紧急'}
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Any]:
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return None

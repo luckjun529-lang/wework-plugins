@@ -1,0 +1,76 @@
+name: DingTalk account authentication package
+
+on:
+  pull_request:
+    paths:
+      - 'plugins/dingtalk/**'
+      - '.github/workflows/dingtalk-package.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/dingtalk/**'
+      - '.github/workflows/dingtalk-package.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.9'
+          cache: false
+      - name: Verify vendored build source inventory
+        run: uv run --no-project python plugins/dingtalk/.wework-build/dws-auth/vendor.py --check .
+      - name: Test package assembly and source inventory
+        run: uv run --no-project python -m unittest discover -s plugins/dingtalk/.wework-build/dws-auth/tests -v
+      - name: Test the shared Python SDK
+        run: uv run --no-project python -m unittest discover -s plugins/dingtalk/.wework-build/plugin-auth/tests -v
+      - name: Test native provider storage and shared transport
+        run: uv run --no-project python plugins/dingtalk/.wework-build/dws-auth/build.py --test --output .ci-artifacts/host/dws-account-auth
+      - name: Build all targets and verify the real packaged entry on this OS
+        run: uv run --no-project python plugins/dingtalk/.wework-build/dws-auth/package.py --plugin plugins/dingtalk --output .ci-artifacts/dingtalk-account-auth.zip
+      - name: Retain the candidate artifact and checksum
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dingtalk-candidate-${{ github.sha }}
+          path: |
+            .ci-artifacts/dingtalk-account-auth.zip
+            .ci-artifacts/dingtalk-account-auth.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  release-artifact:
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dingtalk-candidate-${{ github.sha }}
+          path: release
+      - name: Verify the selected candidate checksum
+        working-directory: release
+        run: sha256sum --check dingtalk-account-auth.zip.sha256
+      - name: Retain the artifact after all three OS jobs pass
+        uses: actions/upload-artifact@v4
+        with:
+          name: dingtalk-account-auth-${{ github.sha }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 14

@@ -11,9 +11,6 @@ Set-StrictMode -Version Latest
 
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDirectory 'invoke-dws.ps1')
-$dws = & (Join-Path $scriptDirectory 'install-dws.ps1') -PrintPath |
-    Select-Object -Last 1
-$env:PATH = "$(Split-Path -Parent $dws);$env:PATH"
 
 $python = Get-Command python3 -ErrorAction SilentlyContinue
 $pythonPrefix = @()

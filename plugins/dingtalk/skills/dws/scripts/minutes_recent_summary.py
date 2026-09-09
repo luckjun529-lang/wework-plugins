@@ -21,12 +21,13 @@ if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
 from minutes_list_parse import uuid_title_pairs_from_payload
+from dws_entry import command as dws_command
 
 
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Any]:
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return None

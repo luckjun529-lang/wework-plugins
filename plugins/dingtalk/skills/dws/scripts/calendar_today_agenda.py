@@ -15,6 +15,7 @@ import json
 import subprocess
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional
+from dws_entry import command as dws_command
 
 TZ = timezone(timedelta(hours=8))
 
@@ -22,7 +23,7 @@ TZ = timezone(timedelta(hours=8))
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Any]:
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return None

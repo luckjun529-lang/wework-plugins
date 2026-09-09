@@ -37,6 +37,7 @@ download_file() {
     if command -v curl >/dev/null 2>&1; then
         curl --fail --show-error --location \
             --retry 3 --retry-all-errors --connect-timeout 15 \
+            --max-time 120 --retry-max-time 240 \
             --output "${DWS_DESTINATION}" "${DWS_SOURCE_URL}"
     elif command -v wget >/dev/null 2>&1; then
         wget --tries=4 --timeout=15 --output-document="${DWS_DESTINATION}" \
@@ -111,6 +112,23 @@ resolve_release() {
             return 1
             ;;
     esac
+
+    # Mirrors must serve the same immutable archives; pinned hashes stay authoritative.
+    if [ -n "${DWS_DOWNLOAD_BASE_URL:-}" ]; then
+        case "${DWS_DOWNLOAD_BASE_URL}" in
+            *[!a-zA-Z0-9:/._~%-]*)
+                echo "DWS_DOWNLOAD_BASE_URL contains unsupported URL characters." >&2
+                return 1
+                ;;
+        esac
+        if ! printf '%s\n' "${DWS_DOWNLOAD_BASE_URL}" |
+            LC_ALL=C grep -Eq '^https://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._~%/-]*)?$'; then
+            echo "DWS_DOWNLOAD_BASE_URL must be an HTTPS artifact base without credentials, query or fragment." >&2
+            return 1
+        fi
+        DWS_ARCHIVE_NAME="${DWS_ARCHIVE_URL##*/}"
+        DWS_ARCHIVE_URL="${DWS_DOWNLOAD_BASE_URL%/}/v${DWS_RELEASE_VERSION}/${DWS_ARCHIVE_NAME}"
+    fi
 }
 
 if DWS_EXECUTABLE="$(find_working_dws)"; then

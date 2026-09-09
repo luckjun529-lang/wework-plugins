@@ -15,6 +15,7 @@ import subprocess
 import re
 from datetime import datetime
 from typing import List, Any, Optional
+from dws_entry import command as dws_command
 
 DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 
@@ -22,7 +23,7 @@ DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 def run_dws(
     args: List[str], dry_run: bool = False,
 ) -> Optional[Any]:
-    cmd = ['dws'] + args
+    cmd = [*dws_command()] + args
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return None

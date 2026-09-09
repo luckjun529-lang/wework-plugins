@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from dws_entry import command as dws_command
 
 RESOURCE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{8,128}$")
 ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
@@ -33,7 +34,7 @@ def validate_resource_id(resource_id: str) -> bool:
 
 
 def run_dws(dws_bin: str, args: list[str], timeout_sec: int = 120) -> Tuple[int, str, str]:
-    cmd = [dws_bin] + args
+    cmd = dws_command(dws_bin) + args
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_sec)
         return result.returncode, result.stdout.strip(), result.stderr.strip()
